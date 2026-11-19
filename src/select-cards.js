@@ -1,5 +1,4 @@
 import { APP_KEY, APP_NAME, APP_AUTHOR } from './config.js';
-import { renderHeader } from './components/header.js';
 import { renderStepper } from './components/stepper.js';
 import { FILTERS, DEFAULT_FILTER_ID } from './config/filters.js';
 import { categorize, getCategoryById } from './config/categories.js';
@@ -29,7 +28,6 @@ let selectedCardIds = new Set();
 let isLoading = false;
 
 // DOM Elements
-const headerRoot = document.getElementById('header-root');
 const stepperRoot = document.getElementById('stepper-root');
 const listSelect = document.getElementById('list-select');
 const filterSelect = document.getElementById('filter-select');
@@ -301,8 +299,7 @@ async function loadCardsForSelectedList(preserveSelections = false) {
  * Initializes the page: loads draft, renders components, fetches lists and cards.
  */
 async function init() {
-  // 1. Render Header and Stepper
-  renderHeader(headerRoot);
+  // 1. Render Stepper
   renderStepper(stepperRoot, 0);
 
   // 2. Populate Filters dropdown from config

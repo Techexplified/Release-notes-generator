@@ -1,5 +1,4 @@
 import { APP_KEY, APP_NAME, APP_AUTHOR } from './config.js';
-import { renderHeader } from './components/header.js';
 import { renderStepper } from './components/stepper.js';
 
 // Initialize Trello iframe client
@@ -17,7 +16,6 @@ try {
 }
 
 // Render components
-renderHeader(document.getElementById('header-root'));
 renderStepper(document.getElementById('stepper-root'), 1); // Step 2 (Categorize) is active
 
 // Back button handler
