@@ -1,9 +1,8 @@
 import { APP_NAME } from '../config.js';
 
 /**
- * Renders the top Power-Up header into the specified container element.
- * Format: [Trello logo mark + "Trello"] [pill "Power-Up"] [vertical divider] [title "Release Notes Generator"]
- * NOTE: NO close/X button is rendered here because Trello provides its own modal chrome.
+ * Renders the top app header into the specified container element.
+ * Format: [Blue Release Notes Logo] [Title "Release Notes Generator"] aligned on the left.
  *
  * @param {HTMLElement} container
  */
@@ -16,16 +15,17 @@ export function renderHeader(container) {
   const brand = document.createElement('div');
   brand.className = 'header-brand';
 
-  // Inline SVG for the classic Trello board logo mark
+  // Professional Release Notes document/changelog icon in primary blue (#0C66E4)
   brand.innerHTML = `
-    <svg class="header-logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <rect width="24" height="24" rx="4" fill="#0C66E4"/>
-      <rect x="4" y="4.5" width="6.5" height="12" rx="1.5" fill="#FFFFFF"/>
-      <rect x="13.5" y="4.5" width="6.5" height="8" rx="1.5" fill="#FFFFFF"/>
-    </svg>
-    <span class="header-trello-text">Trello</span>
-    <span class="header-pill">Power-Up</span>
-    <span class="header-divider" aria-hidden="true"></span>
+    <span class="header-logo-badge" aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0C66E4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+        <polyline points="8 9 9.5 10.5 12 8"></polyline>
+      </svg>
+    </span>
   `;
 
   const title = document.createElement('h1');
@@ -38,4 +38,3 @@ export function renderHeader(container) {
   container.innerHTML = '';
   container.appendChild(header);
 }
-
