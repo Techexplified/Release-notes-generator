@@ -7,9 +7,9 @@ export default defineConfig({
       input: {
         index: resolve(__dirname, 'index.html'),
         'select-cards': resolve(__dirname, 'select-cards.html'),
-        categorize: resolve(__dirname, 'categorize.html')
+        categorize: resolve(__dirname, 'categorize.html'),
+        preview: resolve(__dirname, 'preview.html')
       }
     }
   }
 });
-

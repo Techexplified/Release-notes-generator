@@ -4,7 +4,7 @@ import { WIZARD_STEPS } from '../config/wizard-steps.js';
  * Renders the 4-step wizard progress stepper into the container element.
  *
  * @param {HTMLElement} container - The DOM element to render into
- * @param {number} currentStepIndex - 0-based index of the currently active step (e.g., 0 for 'select')
+ * @param {number} currentStepIndex - 0-based index of the currently active step (e.g., 0 for 'select', 1 for 'categorize')
  */
 export function renderStepper(container, currentStepIndex = 0) {
   if (!container) return;
@@ -19,7 +19,6 @@ export function renderStepper(container, currentStepIndex = 0) {
   WIZARD_STEPS.forEach((step, index) => {
     const isDone = index < currentStepIndex;
     const isActive = index === currentStepIndex;
-    const isUpcoming = index > currentStepIndex;
 
     const li = document.createElement('li');
     li.className = 'stepper-step';
@@ -38,11 +37,10 @@ export function renderStepper(container, currentStepIndex = 0) {
     badge.className = 'stepper-badge';
 
     if (isDone) {
-      // Done-step styling: filled blue circle with a check icon
-      // // TODO: confirm done-step styling against final design specs
+      // Done steps render as filled blue circle with a white check
       badge.innerHTML = `
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M2.5 6L5 8.5L9.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2.5 6L5 8.5L9.5 3.5" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       `;
     } else {
@@ -71,4 +69,3 @@ export function renderStepper(container, currentStepIndex = 0) {
   container.innerHTML = '';
   container.appendChild(nav);
 }
-

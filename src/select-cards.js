@@ -27,6 +27,7 @@ let selectedFilterId = DEFAULT_FILTER_ID;
 let currentListCards = [];
 let selectedCardIds = new Set();
 let isLoading = false;
+let storedDraft = null;
 
 // DOM Elements
 const headerRoot = document.getElementById('header-root');
@@ -338,6 +339,8 @@ async function init() {
       listSelect.appendChild(option);
     });
 
+    storedDraft = draft;
+
     if (availableLists.length === 0) {
       renderStateMessage('No lists found on this board.');
       return;
@@ -353,8 +356,15 @@ async function init() {
         filterSelect.value = selectedFilterId;
       }
 
+      // Restore selection: from selectedCardIds if present, otherwise from union of all categories
       if (Array.isArray(draft.selectedCardIds)) {
         selectedCardIds = new Set(draft.selectedCardIds);
+      } else if (draft.categories && typeof draft.categories === 'object') {
+        const union = [];
+        Object.values(draft.categories).forEach((ids) => {
+          if (Array.isArray(ids)) union.push(...ids);
+        });
+        selectedCardIds = new Set(union);
       }
 
       await loadCardsForSelectedList(true);
@@ -409,11 +419,16 @@ async function init() {
     btnNext.disabled = true;
     const currentList = availableLists.find((l) => l.id === selectedListId);
 
+    // If list changed compared to stored draft, delete categories (keep release)
+    const listChanged = storedDraft && storedDraft.listId && storedDraft.listId !== selectedListId;
+
     const draft = {
       listId: selectedListId,
       listName: currentList ? currentList.name : '',
       filterId: selectedFilterId,
-      selectedCardIds: Array.from(selectedCardIds)
+      selectedCardIds: Array.from(selectedCardIds),
+      release: storedDraft?.release,
+      categories: listChanged ? undefined : storedDraft?.categories
     };
 
     try {
@@ -422,7 +437,7 @@ async function init() {
       console.warn('Failed to save draft before navigating:', err);
     }
 
-    // Navigate to step 2 placeholder inside the same iframe
+    // Navigate to step 2 (categorize.html) inside the same iframe
     window.location.href = 'categorize.html';
   });
 }

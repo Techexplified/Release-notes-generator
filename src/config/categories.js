@@ -1,8 +1,14 @@
-// Category definitions with aliases and chip styling
+// Category definitions with aliases, chip styling, and step 2 configuration
 export const CATEGORIES = [
   {
     id: 'feature',
     label: 'Feature',
+    pluralLabel: 'Features',
+    icon: 'rocket',
+    rowIcon: {
+      bg: '#F3E8FF', // Light purple
+      fg: '#6B21A8'  // Dark purple
+    },
     aliases: ['feature', 'features', 'new feature'],
     chip: {
       bg: '#F3E8FF', // Light purple
@@ -13,6 +19,12 @@ export const CATEGORIES = [
   {
     id: 'improvement',
     label: 'Improvement',
+    pluralLabel: 'Improvements',
+    icon: 'trendUp',
+    rowIcon: {
+      bg: '#DCFCE7', // Light green
+      fg: '#15803D'  // Dark green
+    },
     aliases: ['improvement', 'enhancement', 'improve'],
     chip: {
       bg: '#DCFCE7', // Light green
@@ -23,6 +35,12 @@ export const CATEGORIES = [
   {
     id: 'bugfix',
     label: 'Bug Fix',
+    pluralLabel: 'Bug Fixes',
+    icon: 'bug',
+    rowIcon: {
+      bg: '#FFE4E6', // Light red / pink
+      fg: '#BE123C'  // Dark red
+    },
     aliases: ['bug', 'bug fix', 'bugfix', 'fix'],
     chip: {
       bg: '#FFE4E6', // Light red / pink
@@ -33,6 +51,12 @@ export const CATEGORIES = [
   {
     id: 'uncategorized',
     label: 'Uncategorized',
+    pluralLabel: 'Unassigned',
+    icon: null,
+    rowIcon: {
+      bg: '#F1F2F4', // Neutral grey
+      fg: '#626F86'  // Slate grey
+    },
     aliases: [],
     chip: {
       bg: '#F1F2F4', // Neutral grey
@@ -81,4 +105,3 @@ export function categorize(card) {
 export function getCategoryById(id) {
   return CATEGORIES.find(c => c.id === id) || CATEGORIES.find(c => c.id === 'uncategorized');
 }
-

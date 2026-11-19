@@ -4,18 +4,26 @@
  * Scope: 'board', Visibility: 'private'
  * Key: 'releaseDraft'
  *
- * Contract:
+ * DRAFT CONTRACT:
  * {
  *   listId: string,
  *   listName: string,
  *   filterId: string,
- *   selectedCardIds: string[],
+ *   selectedCardIds?: string[],                                          // written by step 1 on Next; deleted in step 2
+ *   release?: { title: string, version: string, date: 'YYYY-MM-DD' },    // local calendar date, no timezone conversion
+ *   categories?: {                                                      // card ids per category, in display order
+ *     feature: string[],
+ *     improvement: string[],
+ *     bugfix: string[],
+ *     uncategorized: string[]
+ *   },
  *   updatedAt: string (ISO timestamp)
  * }
  *
  * NOTE on Trello Storage:
  * Trello storage is limited per scope+visibility (4096 characters for card, about 8192 for board,
  * summed across all keys), so we store card IDs only rather than complete card payloads.
+ * In step 2, selectedCardIds is deleted on every save so only a single copy of the IDs is stored.
  * // TODO: move the draft to our own database keyed by board and member when the backend exists.
  */
 
@@ -26,7 +34,7 @@ export const DRAFT_VISIBILITY = 'private';
 /**
  * Loads the saved draft from Trello board storage (with fallback to localStorage for local dev/preview).
  * @param {Object} t - Trello Power-Up client instance
- * @returns {Promise<{ listId: string, listName: string, filterId: string, selectedCardIds: string[], updatedAt: string } | null>}
+ * @returns {Promise<Object | null>}
  */
 export async function loadDraft(t) {
   try {
@@ -50,7 +58,7 @@ export async function loadDraft(t) {
 /**
  * Saves the wizard draft to Trello board storage.
  * @param {Object} t - Trello Power-Up client instance
- * @param {{ listId: string, listName: string, filterId: string, selectedCardIds: string[] }} draft
+ * @param {Object} draft - Draft object adhering to DRAFT CONTRACT
  * @returns {Promise<void>}
  */
 export async function saveDraft(t, draft) {
@@ -58,9 +66,22 @@ export async function saveDraft(t, draft) {
     listId: draft.listId || '',
     listName: draft.listName || '',
     filterId: draft.filterId || 'last14',
-    selectedCardIds: Array.isArray(draft.selectedCardIds) ? draft.selectedCardIds : [],
     updatedAt: new Date().toISOString()
   };
+
+  // Only include selectedCardIds if explicitly provided as an array
+  // (In Step 2, selectedCardIds is omitted to maintain a single copy of card IDs)
+  if (Array.isArray(draft.selectedCardIds)) {
+    payload.selectedCardIds = draft.selectedCardIds;
+  }
+
+  if (draft.release && typeof draft.release === 'object') {
+    payload.release = draft.release;
+  }
+
+  if (draft.categories && typeof draft.categories === 'object') {
+    payload.categories = draft.categories;
+  }
 
   try {
     if (t && typeof t.set === 'function') {
@@ -86,7 +107,6 @@ export async function saveDraft(t, draft) {
 export async function clearDraft(t) {
   try {
     if (t && typeof t.set === 'function') {
-      // Trello storage clears by setting undefined or empty object
       await t.set(DRAFT_SCOPE, DRAFT_VISIBILITY, DRAFT_KEY, undefined);
     }
   } catch (error) {
@@ -99,4 +119,3 @@ export async function clearDraft(t) {
     // ignore
   }
 }
-
