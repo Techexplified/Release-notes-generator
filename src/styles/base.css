@@ -748,6 +748,13 @@ button, input, select {
   border-color: #be123c;
 }
 
+.form-helper-text {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
 .form-error-text {
   font-size: var(--font-size-xs);
   color: #be123c;

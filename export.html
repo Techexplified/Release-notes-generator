@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Release Notes Generator - Export</title>
+    <link rel="stylesheet" href="./src/styles/base.css" />
+  </head>
+  <body>
+    <div class="wizard-layout">
+      <!-- App Header Component -->
+      <div id="header-root"></div>
+
+      <!-- Stepper Component (Step 4 Active) -->
+      <div id="stepper-root"></div>
+
+      <!-- Page Intro Heading -->
+      <section class="wizard-page-intro">
+        <h2 class="page-title">Export</h2>
+        <p class="page-subtitle">Export your formatted release notes to Markdown, HTML, or plain text.</p>
+      </section>
+
+      <!-- Placeholder Body -->
+      <main class="wizard-body" style="align-items: center; justify-content: center; padding: 40px 24px;">
+        <div class="state-container" style="max-width: 440px;">
+          <div style="width: 48px; height: 48px; border-radius: 50%; background: #f0f7ff; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0c66e4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </div>
+          <h3 style="font-size: 18px; font-weight: 600; color: #172b4d; margin-bottom: 8px;">Step 4 is coming next</h3>
+          <p class="state-message" style="margin-bottom: 24px;">
+            In the final milestone, you will be able to copy your release notes or export them directly as Markdown, HTML, or plain text.
+          </p>
+        </div>
+      </main>
+
+      <!-- Wizard Footer with Back Button -->
+      <footer class="wizard-footer" style="justify-content: flex-start;">
+        <button id="btn-back" type="button" class="btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          <span>Back</span>
+        </button>
+      </footer>
+    </div>
+
+    <!-- Trello Power-Up library -->
+    <script src="https://p.trellocdn.com/power-up.min.js"></script>
+    <!-- Step 4 Placeholder Logic -->
+    <script type="module" src="./src/export.js"></script>
+  </body>
+</html>

@@ -1,6 +1,7 @@
 /**
  * Inline SVG icons for Release Notes Generator.
- * Icon names: rocket, trendUp, bug, calendar, chevronDown, close, arrowLeft, arrowRight.
+ * Icon names: rocket, trendUp, bug, calendar, chevronDown, close, arrowLeft, arrowRight,
+ * bold, italic, listBullet, listOrdered, link, undo, redo, info.
  */
 
 export const ICONS = {
@@ -68,6 +69,72 @@ export const ICONS = {
       <line x1="5" y1="12" x2="19" y2="12"></line>
       <polyline points="12 5 19 12 12 19"></polyline>
     </svg>
+  `,
+
+  bold: (size = 16, strokeWidth = 2) => `
+    <svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
+      <path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
+    </svg>
+  `,
+
+  italic: (size = 16, strokeWidth = 2) => `
+    <svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <line x1="19" y1="4" x2="10" y2="4"></line>
+      <line x1="14" y1="20" x2="5" y2="20"></line>
+      <line x1="15" y1="4" x2="9" y2="20"></line>
+    </svg>
+  `,
+
+  listBullet: (size = 16, strokeWidth = 2) => `
+    <svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <line x1="9" y1="6" x2="20" y2="6"></line>
+      <line x1="9" y1="12" x2="20" y2="12"></line>
+      <line x1="9" y1="18" x2="20" y2="18"></line>
+      <circle cx="4" cy="6" r="1.5" fill="currentColor"></circle>
+      <circle cx="4" cy="12" r="1.5" fill="currentColor"></circle>
+      <circle cx="4" cy="18" r="1.5" fill="currentColor"></circle>
+    </svg>
+  `,
+
+  listOrdered: (size = 16, strokeWidth = 2) => `
+    <svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <line x1="10" y1="6" x2="21" y2="6"></line>
+      <line x1="10" y1="12" x2="21" y2="12"></line>
+      <line x1="10" y1="18" x2="21" y2="18"></line>
+      <path d="M4 6h2v-4"></path>
+      <path d="M4 10h2a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H4h3"></path>
+      <path d="M4 16h2a1 1 0 0 1 1 1v.5a.5.5 0 0 1-.5.5H5.5a.5.5 0 0 1 .5.5V19a1 1 0 0 1-1 1H4"></path>
+    </svg>
+  `,
+
+  link: (size = 16, strokeWidth = 2) => `
+    <svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+    </svg>
+  `,
+
+  undo: (size = 16, strokeWidth = 2) => `
+    <svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="1 4 1 10 7 10"></polyline>
+      <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+    </svg>
+  `,
+
+  redo: (size = 16, strokeWidth = 2) => `
+    <svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="23 4 23 10 17 10"></polyline>
+      <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+    </svg>
+  `,
+
+  info: (size = 16, strokeWidth = 2) => `
+    <svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="16" x2="12" y2="12"></line>
+      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+    </svg>
   `
 };
 
@@ -82,4 +149,3 @@ export function getIcon(name, size = 18, strokeWidth = 2) {
   const iconFn = ICONS[name];
   return iconFn ? iconFn(size, strokeWidth) : '';
 }
-

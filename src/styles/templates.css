@@ -1,0 +1,208 @@
+/* ==========================================================================
+   Release Notes Templates Styling
+   Supports: Customer-Friendly (.tpl-customer), Technical (.tpl-technical), Executive (.tpl-executive)
+   ========================================================================== */
+
+/* Common Document Elements */
+.doc-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #172b4d;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.doc-meta {
+  font-size: 13px;
+  color: #626f86;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.editor-surface p,
+.preview-surface p {
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.editor-surface ul,
+.preview-surface ul,
+.editor-surface ol,
+.preview-surface ol {
+  padding-left: 22px;
+  margin-bottom: 18px;
+}
+
+.editor-surface li,
+.preview-surface li {
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+
+.item-desc {
+  font-size: 13px;
+  color: #626f86;
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+.card-link {
+  color: #0c66e4;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+.card-link:hover {
+  text-decoration: underline;
+}
+
+/* Sub-items (nested checklist items) */
+.sub-items {
+  margin-top: 4px;
+  margin-bottom: 6px;
+  padding-left: 20px;
+}
+
+.sub-items li {
+  margin-bottom: 3px;
+  line-height: 1.4;
+}
+
+/* --------------------------------------------------------------------------
+   Template 1: Customer-Friendly Changelog (.tpl-customer)
+   -------------------------------------------------------------------------- */
+.tpl-customer {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #172b4d;
+}
+
+.tpl-customer .sub-items {
+  font-size: 13px;
+  color: #44546f;
+  list-style-type: disc;
+}
+
+.tpl-customer .doc-meta {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-style: italic;
+  font-size: 12px;
+}
+
+.tpl-customer .band {
+  font-size: 15px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 6px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.tpl-customer .band-feature {
+  background-color: #f3e8ff;
+  color: #6b21a8;
+}
+
+.tpl-customer .band-improvement {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.tpl-customer .band-bugfix {
+  background-color: #ffe4e6;
+  color: #be123c;
+}
+
+.tpl-customer .band-icon {
+  margin-right: 6px;
+}
+
+/* --------------------------------------------------------------------------
+   Template 2: Technical Changelog (.tpl-technical)
+   -------------------------------------------------------------------------- */
+.tpl-technical {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 13px;
+  color: #1f2937;
+  line-height: 1.5;
+}
+
+.tpl-technical .doc-title {
+  font-family: inherit;
+  font-size: 18px;
+  letter-spacing: -0.2px;
+}
+
+.tpl-technical .doc-meta {
+  font-family: inherit;
+  font-style: normal;
+  color: #6b7280;
+}
+
+.tpl-technical .band {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+  background: transparent;
+  padding: 0 0 4px 0;
+  border-bottom: 1px solid #e5e7eb;
+  margin-top: 18px;
+  margin-bottom: 8px;
+}
+
+.tpl-technical .sub-items {
+  font-family: inherit;
+  font-size: 12px;
+  color: #4b5563;
+  list-style-type: none;
+  padding-left: 14px;
+}
+
+.tpl-technical .sub-items li::before {
+  content: "- ";
+  color: #9ca3af;
+  margin-right: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   Template 3: Executive Summary (.tpl-executive)
+   -------------------------------------------------------------------------- */
+.tpl-executive {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #1e293b;
+  line-height: 1.6;
+}
+
+.tpl-executive .sub-items {
+  font-family: inherit;
+  font-size: 13px;
+  color: #64748b;
+  list-style-type: circle;
+}
+
+.tpl-executive .doc-title {
+  font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Times New Roman", serif;
+  font-size: 22px;
+  color: #0f172a;
+}
+
+.tpl-executive .doc-meta {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.tpl-executive .band {
+  font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Times New Roman", serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  background: transparent;
+  padding-left: 10px;
+  border-left: 3px solid #0c66e4;
+  margin-top: 22px;
+  margin-bottom: 10px;
+}

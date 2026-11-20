@@ -17,6 +17,15 @@
  *     bugfix: string[],
  *     uncategorized: string[]
  *   },
+ *   preview?: {                                                         // Step 3 preview configuration
+ *     templateId: string,
+ *     include: {
+ *       descriptions: boolean,
+ *       links: boolean,
+ *       date: boolean,
+ *       version: boolean
+ *     }
+ *   },
  *   updatedAt: string (ISO timestamp)
  * }
  *
@@ -24,6 +33,7 @@
  * Trello storage is limited per scope+visibility (4096 characters for card, about 8192 for board,
  * summed across all keys), so we store card IDs only rather than complete card payloads.
  * In step 2, selectedCardIds is deleted on every save so only a single copy of the IDs is stored.
+ * In step 3, preview options are saved here while the full rendered document is stored in doc-store.js.
  * // TODO: move the draft to our own database keyed by board and member when the backend exists.
  */
 
@@ -57,30 +67,36 @@ export async function loadDraft(t) {
 
 /**
  * Saves the wizard draft to Trello board storage.
+ * Merges updates into existing draft so unknown/existing keys (release, categories, preview) are never dropped.
+ *
  * @param {Object} t - Trello Power-Up client instance
- * @param {Object} draft - Draft object adhering to DRAFT CONTRACT
+ * @param {Object} draftUpdates - Draft updates adhering to DRAFT CONTRACT
  * @returns {Promise<void>}
  */
-export async function saveDraft(t, draft) {
+export async function saveDraft(t, draftUpdates = {}) {
+  let existing = null;
+  try {
+    existing = await loadDraft(t);
+  } catch {
+    // ignore
+  }
+
   const payload = {
-    listId: draft.listId || '',
-    listName: draft.listName || '',
-    filterId: draft.filterId || 'last14',
+    ...(existing || {}),
+    ...draftUpdates,
     updatedAt: new Date().toISOString()
   };
 
-  // Only include selectedCardIds if explicitly provided as an array
-  // (In Step 2, selectedCardIds is omitted to maintain a single copy of card IDs)
-  if (Array.isArray(draft.selectedCardIds)) {
-    payload.selectedCardIds = draft.selectedCardIds;
+  // If draftUpdates explicitly sets keys to undefined, remove them from payload
+  for (const key of Object.keys(draftUpdates)) {
+    if (draftUpdates[key] === undefined) {
+      delete payload[key];
+    }
   }
 
-  if (draft.release && typeof draft.release === 'object') {
-    payload.release = draft.release;
-  }
-
-  if (draft.categories && typeof draft.categories === 'object') {
-    payload.categories = draft.categories;
+  // When categories are updated in Step 2 without selectedCardIds, delete selectedCardIds to save quota
+  if (draftUpdates.categories && !('selectedCardIds' in draftUpdates)) {
+    delete payload.selectedCardIds;
   }
 
   try {

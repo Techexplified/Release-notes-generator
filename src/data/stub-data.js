@@ -24,6 +24,18 @@ export const STUB_CARDS = [
     url: 'https://trello.com/c/card-done-1',
     idList: 'list-done',
     labels: [{ id: 'lbl-feat', name: 'Feature', color: 'purple' }],
+    checklists: [
+      {
+        id: 'cl-1',
+        name: 'Checklist',
+        pos: 1000,
+        checkItems: [
+          { id: 'ci-1-1', name: 'Theme toggle in settings', state: 'complete', pos: 100 },
+          { id: 'ci-1-2', name: 'Remembers your choice across sessions', state: 'complete', pos: 200 },
+          { id: 'ci-1-3', name: 'Dark styles for all screens', state: 'complete', pos: 300 }
+        ]
+      }
+    ],
     completedAt: relativeIso(1, 2),
     due: null
   },
@@ -33,6 +45,7 @@ export const STUB_CARDS = [
     url: 'https://trello.com/c/card-done-2',
     idList: 'list-done',
     labels: [{ id: 'lbl-imp', name: 'Improvement', color: 'green' }],
+    // Intentionally left without checklists to test fallback behavior
     completedAt: relativeIso(2, 5),
     due: null
   },
@@ -42,6 +55,16 @@ export const STUB_CARDS = [
     url: 'https://trello.com/c/card-done-3',
     idList: 'list-done',
     labels: [{ id: 'lbl-bug', name: 'Bug Fix', color: 'red' }],
+    checklists: [
+      {
+        id: 'cl-3',
+        name: 'Checklist',
+        pos: 1000,
+        checkItems: [
+          { id: 'ci-3-1', name: 'Keyboard no longer covers the login button', state: 'complete', pos: 100 }
+        ]
+      }
+    ],
     completedAt: relativeIso(4, 1),
     due: null
   },
@@ -51,6 +74,18 @@ export const STUB_CARDS = [
     url: 'https://trello.com/c/card-done-4',
     idList: 'list-done',
     labels: [{ id: 'lbl-feat', name: 'Feature', color: 'purple' }],
+    checklists: [
+      {
+        id: 'cl-4',
+        name: 'Checklist',
+        pos: 1000,
+        checkItems: [
+          { id: 'ci-4-1', name: 'Shorter sign-up steps', state: 'complete', pos: 100 },
+          { id: 'ci-4-2', name: 'New welcome checklist', state: 'complete', pos: 200 },
+          { id: 'ci-4-3', name: 'Skippable product tour', state: 'incomplete', pos: 300 }
+        ]
+      }
+    ],
     completedAt: relativeIso(6, 3),
     due: null
   },
@@ -60,27 +95,69 @@ export const STUB_CARDS = [
     url: 'https://trello.com/c/card-done-5',
     idList: 'list-done',
     labels: [{ id: 'lbl-imp', name: 'Improvement', color: 'green' }],
+    // Card with checklist having zero items (tests empty checklist handling)
+    checklists: [
+      {
+        id: 'cl-5',
+        name: 'Tasks',
+        pos: 1000,
+        checkItems: []
+      }
+    ],
     completedAt: relativeIso(8, 6),
     due: null
   },
   {
     id: 'card-done-6',
     name: 'Resolve memory leak in real-time notification socket listener',
+    desc: 'Cleaned up lingering event listener references in WebSocket connections to avoid browser memory leaks during extended dashboard sessions.',
     url: 'https://trello.com/c/card-done-6',
     idList: 'list-done',
     labels: [{ id: 'lbl-bug', name: 'Bug Fix', color: 'red' }],
+    checklists: [
+      {
+        id: 'cl-6',
+        name: 'Fixes',
+        pos: 1000,
+        checkItems: [
+          { id: 'ci-6-1', name: 'Unbind lingering event listeners', state: 'complete', pos: 100 },
+          { id: 'ci-6-2', name: 'Add automated listener cleanup on unmount', state: 'complete', pos: 200 }
+        ]
+      }
+    ],
     completedAt: relativeIso(10, 4),
     due: null
   },
-  // Card with TWO matching labels (Feature and Bug Fix) to test array-order category priority
+  // Card with TWO matching labels and TWO checklists (tests ordering)
   {
     id: 'card-done-7',
     name: 'Upgrade rich text editor with markdown table support',
+    desc: 'Added native table insertion and formatting shortcuts to the markdown post editor for technical documentation.',
     url: 'https://trello.com/c/card-done-7',
     idList: 'list-done',
     labels: [
       { id: 'lbl-feat', name: 'Feature', color: 'purple' },
       { id: 'lbl-bug', name: 'Bug Fix', color: 'red' }
+    ],
+    checklists: [
+      {
+        id: 'cl-7a',
+        name: 'Editor',
+        pos: 1000,
+        checkItems: [
+          { id: 'ci-7a-1', name: 'Table insertion dialog', state: 'complete', pos: 100 },
+          { id: 'ci-7a-2', name: 'Cell navigation with Tab key', state: 'complete', pos: 200 }
+        ]
+      },
+      {
+        id: 'cl-7b',
+        name: 'Formatting',
+        pos: 2000,
+        checkItems: [
+          { id: 'ci-7b-1', name: 'Header row styling', state: 'complete', pos: 100 },
+          { id: 'ci-7b-2', name: 'Column alignment buttons', state: 'incomplete', pos: 200 }
+        ]
+      }
     ],
     completedAt: relativeIso(11, 2),
     due: null
@@ -89,6 +166,7 @@ export const STUB_CARDS = [
   {
     id: 'card-done-8',
     name: 'Update API documentation for webhooks v2',
+    desc: 'Published complete reference documentation and payload examples for version 2 of the webhook subscription endpoints.',
     url: 'https://trello.com/c/card-done-8',
     idList: 'list-done',
     labels: [{ id: 'lbl-docs', name: 'Documentation', color: 'blue' }],
@@ -99,6 +177,7 @@ export const STUB_CARDS = [
   {
     id: 'card-done-9',
     name: 'Export release notes as formatted PDF',
+    desc: 'Users can now download their generated release notes as cleanly styled PDF documents directly from the export view.',
     url: 'https://trello.com/c/card-done-9',
     idList: 'list-done',
     labels: [{ id: 'lbl-feat', name: 'Feature', color: 'purple' }],

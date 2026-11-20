@@ -3,8 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Release Notes Generator - Preview & Edit</title>
+    <title>Release Notes Generator - Preview &amp; Edit</title>
     <link rel="stylesheet" href="./src/styles/base.css" />
+    <link rel="stylesheet" href="./src/styles/templates.css" />
+    <link rel="stylesheet" href="./src/styles/editor.css" />
   </head>
   <body>
     <div class="wizard-layout">
@@ -17,27 +19,96 @@
       <!-- Page Intro Heading -->
       <section class="wizard-page-intro">
         <h2 class="page-title">Preview &amp; Edit</h2>
-        <p class="page-subtitle">Review the generated release notes before publishing.</p>
+        <p class="page-subtitle">Review and edit the generated release notes before exporting.</p>
       </section>
 
-      <!-- Placeholder Body -->
-      <main class="wizard-body" style="align-items: center; justify-content: center; padding: 40px 24px;">
-        <div class="state-container" style="max-width: 440px;">
-          <div style="width: 48px; height: 48px; border-radius: 50%; background: #f0f7ff; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0c66e4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
+      <!-- Main Body: Two Columns -->
+      <main id="wizard-body-main" class="wizard-body">
+        <!-- Left Column: Template Selection and Options -->
+        <aside class="wizard-sidebar" aria-label="Template and content configuration" style="width: 250px; min-width: 230px;">
+          <!-- Template Selector -->
+          <div class="form-group">
+            <label for="template-select" class="form-label">Template</label>
+            <div class="select-wrapper">
+              <select id="template-select" class="custom-select" aria-label="Select release notes template">
+                <!-- Dynamically populated from TEMPLATES config -->
+              </select>
+              <span class="select-chevron" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </span>
+            </div>
+            <!-- Template Description Info Box -->
+            <div id="template-info-box" class="template-info-box" role="status">
+              <span class="template-info-icon" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+              </span>
+              <span id="template-desc-text" class="template-desc-text"></span>
+            </div>
           </div>
-          <h3 style="font-size: 18px; font-weight: 600; color: #172b4d; margin-bottom: 8px;">Step 3 is coming next</h3>
-          <p class="state-message" style="margin-bottom: 24px;">
-            In the next milestone, you will preview, edit, and polish your AI-generated release notes.
-          </p>
-        </div>
+
+          <!-- Include in Release Notes Checkboxes -->
+          <div class="form-group" style="margin-top: 10px;">
+            <h3 class="sidebar-heading">Include in release notes</h3>
+            <div id="include-options-container" class="include-options-group">
+              <!-- Dynamically populated checkboxes -->
+            </div>
+          </div>
+        </aside>
+
+        <!-- Right Column: Tabs (Edit / Preview) and Rich Text Editor -->
+        <section class="wizard-content" aria-label="Release notes editor and preview">
+          <!-- Accessible Tabs Header -->
+          <div class="tabs-header-container">
+            <div id="tabs-root"></div>
+          </div>
+
+          <!-- Editor / Preview Frame -->
+          <div class="editor-frame">
+            <!-- Toolbar (Visible in Edit Tab) -->
+            <div id="toolbar-root"></div>
+
+            <!-- Edit Tab Panel -->
+            <div
+              id="panel-edit"
+              class="editor-surface-container"
+              role="tabpanel"
+              aria-labelledby="tab-edit"
+              tabindex="0"
+            >
+              <div
+                id="editor-surface"
+                class="editor-surface"
+                contenteditable="true"
+                role="textbox"
+                aria-multiline="true"
+                aria-label="Release notes editor"
+                spellcheck="true"
+              ></div>
+            </div>
+
+            <!-- Preview Tab Panel (Visible in Preview Tab) -->
+            <div
+              id="panel-preview"
+              class="preview-surface-container"
+              role="tabpanel"
+              aria-labelledby="tab-preview"
+              tabindex="0"
+              style="display: none;"
+            >
+              <div id="preview-surface" class="preview-surface"></div>
+            </div>
+          </div>
+        </section>
       </main>
 
-      <!-- Wizard Footer with Back Button -->
-      <footer class="wizard-footer" style="justify-content: flex-start;">
+      <!-- Wizard Footer -->
+      <footer class="wizard-footer" style="justify-content: space-between;">
         <button id="btn-back" type="button" class="btn-secondary">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -45,13 +116,23 @@
           </svg>
           <span>Back</span>
         </button>
+
+        <button id="btn-next" type="button" class="btn-primary" title="Export release notes">
+          <span>Next: Export</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
       </footer>
     </div>
 
+    <!-- Live Accessibility Announcements -->
+    <div id="sr-announcements" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
     <!-- Trello Power-Up library -->
     <script src="https://p.trellocdn.com/power-up.min.js"></script>
-    <!-- Step 3 Placeholder Logic -->
+    <!-- Step 3 Logic -->
     <script type="module" src="./src/preview.js"></script>
   </body>
 </html>
-

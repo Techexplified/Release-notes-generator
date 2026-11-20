@@ -11,6 +11,31 @@ const SIMULATED_LATENCY_MS = 300;
  */
 
 /**
+ * Card Shape Contract:
+ * {
+ *   id: string,
+ *   name: string,
+ *   desc?: string,
+ *   url: string,
+ *   idList: string,
+ *   labels: Array<{ id: string, name: string, color: string }>,
+ *   checklists?: Array<{
+ *     id: string,
+ *     name: string,
+ *     pos: number,
+ *     checkItems: Array<{
+ *       id: string,
+ *       name: string,
+ *       state: 'complete' | 'incomplete',
+ *       pos: number
+ *     }>
+ *   }>,
+ *   completedAt: string,
+ *   due: string | null
+ * }
+ */
+
+/**
  * Fetches lists on the current board along with their open card counts.
  *
  * Contract:
@@ -36,16 +61,20 @@ export async function getLists(t) {
 }
 
 /**
- * Fetches open cards belonging to the specified list.
+ * Fetches open cards belonging to the specified list, including checklists.
+ *
+ * Trello documents that check items are not guaranteed in t.cards(), and t.card() only works
+ * inside a card context, so the real implementation should use the REST API:
+ * GET /1/lists/{listId}/cards?fields=id,name,url,idList,labels,desc&checklists=all
+ * with a token from t.getRestApi() (scope read; authorize() must run inside a click handler;
+ * the Vercel origin must be in Allowed Origins). // TODO wire with the backend.
  *
  * Contract:
  * @param {Object} t - Trello Power-Up client instance
  * @param {string} listId - Trello list ID
- * @returns {Promise<Array<{ id: string, name: string, url: string, idList: string, labels: Array<{ id: string, name: string, color: string }>, completedAt: string, due: string|null }>>}
+ * @returns {Promise<Array<Object>>}
  */
 export async function getCardsForList(t, listId) {
-  // TODO: Replace with real Trello Power-Up call:
-  // t.cards('id', 'name', 'url', 'idList', 'labels', 'dateLastActivity') filtering for open cards only.
   return new Promise((resolve) => {
     setTimeout(() => {
       const cards = STUB_CARDS.filter((card) => card.idList === listId);
@@ -53,4 +82,3 @@ export async function getCardsForList(t, listId) {
     }, SIMULATED_LATENCY_MS);
   });
 }
-

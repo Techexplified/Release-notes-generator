@@ -8,7 +8,8 @@ export default defineConfig({
         index: resolve(__dirname, 'index.html'),
         'select-cards': resolve(__dirname, 'select-cards.html'),
         categorize: resolve(__dirname, 'categorize.html'),
-        preview: resolve(__dirname, 'preview.html')
+        preview: resolve(__dirname, 'preview.html'),
+        export: resolve(__dirname, 'export.html')
       }
     }
   }
