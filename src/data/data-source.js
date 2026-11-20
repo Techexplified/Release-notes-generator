@@ -260,7 +260,10 @@ export async function getAllCards(t) {
  */
 export async function getCardsByIds(t, cardIds, listId = null) {
   if (!Array.isArray(cardIds) || cardIds.length === 0) return [];
-  const targetIds = new Set(cardIds);
+  // Keep the caller's order. Cache and Trello responses are not guaranteed to
+  // use the same order as the user's selection.
+  const orderedIds = [...new Set(cardIds)];
+  const targetIds = new Set(orderedIds);
   const resultCards = new Map();
 
   // 1. Check sessionStorage caches
@@ -293,7 +296,7 @@ export async function getCardsByIds(t, cardIds, listId = null) {
   }
 
   if (resultCards.size === targetIds.size) {
-    return Array.from(resultCards.values());
+    return orderedIds.map((id) => resultCards.get(id));
   }
 
   // 2. Query target list if provided
@@ -313,7 +316,7 @@ export async function getCardsByIds(t, cardIds, listId = null) {
   }
 
   if (resultCards.size === targetIds.size) {
-    return Array.from(resultCards.values());
+    return orderedIds.map((id) => resultCards.get(id));
   }
 
   // 3. Query all board cards via t.cards
@@ -333,7 +336,7 @@ export async function getCardsByIds(t, cardIds, listId = null) {
   }
 
   if (resultCards.size === targetIds.size) {
-    return Array.from(resultCards.values());
+    return orderedIds.map((id) => resultCards.get(id));
   }
 
   // 4. Fallback to STUB_CARDS for any remaining missing IDs
@@ -343,5 +346,5 @@ export async function getCardsByIds(t, cardIds, listId = null) {
     }
   });
 
-  return Array.from(resultCards.values());
+  return orderedIds.filter((id) => resultCards.has(id)).map((id) => resultCards.get(id));
 }
