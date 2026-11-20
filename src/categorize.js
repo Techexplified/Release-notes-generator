@@ -569,27 +569,66 @@ async function init() {
   renderLoadingSkeleton();
 
   try {
-    const draft = await loadDraft(t);
-    currentDraft = draft;
+    let draft = await loadDraft(t);
 
-    if (!draft || !draft.listId) {
-      renderEmptyOrErrorState('Select cards first to continue.');
-      return;
+    // Fallback for standalone preview outside Trello if no draft exists yet
+    if (!draft || (!draft.listId && !draft.selectedCardIds && !draft.categories)) {
+      if (!t) {
+        draft = {
+          listId: 'list-done',
+          listName: 'Done',
+          filterId: 'all',
+          selectedCardIds: ['card-done-1', 'card-done-4', 'card-done-2', 'card-done-3'],
+          release: {
+            title: 'Product Update',
+            version: 'v2.3.0',
+            date: getTodayLocalDate()
+          },
+          categories: {
+            feature: ['card-done-1', 'card-done-4'],
+            improvement: ['card-done-2'],
+            bugfix: ['card-done-3'],
+            uncategorized: []
+          }
+        };
+      } else {
+        renderEmptyOrErrorState('Select cards first to continue.');
+        return;
+      }
     }
 
+    currentDraft = draft;
+
     // Determine selected card IDs: draft.selectedCardIds ?? union of categories
-    const initialSelectedIds = Array.isArray(draft.selectedCardIds) && draft.selectedCardIds.length > 0
+    let initialSelectedIds = Array.isArray(draft.selectedCardIds) && draft.selectedCardIds.length > 0
       ? draft.selectedCardIds
       : getUnionOfCategories(draft.categories);
 
     if (!initialSelectedIds || initialSelectedIds.length === 0) {
-      renderEmptyOrErrorState('Select cards first to continue.');
-      return;
+      if (!t) {
+        initialSelectedIds = ['card-done-1', 'card-done-4', 'card-done-2', 'card-done-3'];
+      } else {
+        renderEmptyOrErrorState('Select cards first to continue.');
+        return;
+      }
     }
 
     // 3. Fetch selected cards (from session cache, list, or board)
     selectedCards = await getCardsByIds(t, initialSelectedIds, draft.listId);
     cardMap = new Map(selectedCards.map((c) => [c.id, c]));
+
+    // Resilience: ensure any selected card IDs that couldn't be fetched have safe fallback representations
+    for (const id of initialSelectedIds) {
+      if (!cardMap.has(id)) {
+        const placeholder = {
+          id,
+          name: 'Selected Card (' + (id.length > 6 ? id.slice(-6) : id) + ')',
+          labels: []
+        };
+        selectedCards.push(placeholder);
+        cardMap.set(id, placeholder);
+      }
+    }
 
     if (selectedCards.length === 0) {
       renderEmptyOrErrorState('Select cards first to continue.');

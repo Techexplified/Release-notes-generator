@@ -403,14 +403,31 @@ async function init() {
   renderStepper(stepperRoot, 2); // Step 3 (Preview & Edit) is active
 
   try {
-    const draft = await loadDraft(t);
-    currentDraft = draft;
+    let draft = await loadDraft(t);
 
-    // Validation: must have draft, listId, and assigned categories
-    if (!draft || !draft.listId || !draft.categories) {
-      renderPrerequisiteError('Finish the previous steps to continue.');
-      return;
+    if (!draft || (!draft.listId && !draft.categories)) {
+      if (!t) {
+        draft = {
+          listId: 'list-done',
+          release: {
+            title: 'Product Update',
+            version: 'v2.3.0',
+            date: '2026-01-28'
+          },
+          categories: {
+            feature: ['card-done-1', 'card-done-4'],
+            improvement: ['card-done-2'],
+            bugfix: ['card-done-3'],
+            uncategorized: []
+          }
+        };
+      } else {
+        renderPrerequisiteError('Finish the previous steps to continue.');
+        return;
+      }
     }
+
+    currentDraft = draft;
 
     // Must not have cards in uncategorized
     const uncategorizedCards = draft.categories.uncategorized || [];

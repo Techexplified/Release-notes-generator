@@ -43,11 +43,43 @@ export const DRAFT_VISIBILITY = 'private';
 
 /**
  * Loads the saved draft from Trello board storage (with fallback to sessionStorage and localStorage).
+ * Evaluates all available storage tiers and prioritizes the draft with active card selections.
+ *
  * @param {Object} t - Trello Power-Up client instance
  * @returns {Promise<Object | null>}
  */
 export async function loadDraft(t) {
   let trelloData = null;
+  let sessionData = null;
+  let localData = null;
+
+  // 1. SessionStorage (fastest within current modal session)
+  try {
+    const session = sessionStorage.getItem(DRAFT_KEY);
+    if (session) {
+      const parsed = JSON.parse(session);
+      if (parsed && typeof parsed === 'object') {
+        sessionData = parsed;
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  // 2. LocalStorage (offline / dev preview)
+  try {
+    const local = localStorage.getItem(DRAFT_KEY);
+    if (local) {
+      const parsed = JSON.parse(local);
+      if (parsed && typeof parsed === 'object') {
+        localData = parsed;
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  // 3. Trello board storage
   try {
     if (t && typeof t.get === 'function') {
       const data = await t.get(DRAFT_SCOPE, DRAFT_VISIBILITY, DRAFT_KEY);
@@ -56,38 +88,33 @@ export async function loadDraft(t) {
       }
     }
   } catch (error) {
-    console.warn('Unable to read draft from Trello storage, falling back to session/local storage:', error);
+    console.warn('Unable to read draft from Trello storage:', error);
   }
 
-  if (trelloData) return trelloData;
+  const candidates = [sessionData, trelloData, localData].filter(Boolean);
+  if (candidates.length === 0) return null;
 
-  // Fallback to sessionStorage (fast synchronous cache for current modal session)
-  try {
-    const session = sessionStorage.getItem(DRAFT_KEY);
-    if (session) {
-      const parsed = JSON.parse(session);
-      if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
-        return parsed;
-      }
+  // Prioritize candidate with active card selections (selectedCardIds or categories)
+  const hasCards = (d) => {
+    if (Array.isArray(d.selectedCardIds) && d.selectedCardIds.length > 0) return true;
+    if (d.categories && typeof d.categories === 'object') {
+      return Object.values(d.categories).some((arr) => Array.isArray(arr) && arr.length > 0);
     }
-  } catch {
-    // ignore
-  }
+    return false;
+  };
 
-  // Fallback to localStorage for local dev/preview
-  try {
-    const local = localStorage.getItem(DRAFT_KEY);
-    if (local) {
-      const parsed = JSON.parse(local);
-      if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
-        return parsed;
-      }
-    }
-  } catch {
-    // ignore
-  }
+  candidates.sort((a, b) => {
+    const aHas = hasCards(a);
+    const bHas = hasCards(b);
+    if (aHas && !bHas) return -1;
+    if (!aHas && bHas) return 1;
 
-  return null;
+    const timeA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+    const timeB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+    return timeB - timeA;
+  });
+
+  return candidates[0];
 }
 
 /**
