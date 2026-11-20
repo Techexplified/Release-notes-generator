@@ -223,3 +223,125 @@ export async function getCardsForList(t, listId) {
     }, SIMULATED_LATENCY_MS);
   });
 }
+
+/**
+ * Fetches all visible cards across the board.
+ *
+ * @param {Object} t - Trello Power-Up client instance
+ * @returns {Promise<Array<Object>>}
+ */
+export async function getAllCards(t) {
+  if (t && typeof t.cards === 'function') {
+    try {
+      const rawCards = await t.cards('id', 'name', 'desc', 'due', 'dueComplete', 'labels', 'url', 'idList', 'dateLastActivity', 'checklists', 'closed')
+        .catch(() => t.cards('all'));
+
+      if (Array.isArray(rawCards) && rawCards.length > 0) {
+        return rawCards.filter((card) => !card.closed).map(normalizeCard).filter(Boolean);
+      }
+    } catch (err) {
+      console.warn('t.cards failed in getAllCards:', err);
+    }
+  }
+
+  // Fallback to all stub cards
+  return STUB_CARDS.map(normalizeCard).filter(Boolean);
+}
+
+/**
+ * Retrieves card objects matching an array of card IDs.
+ * Checks session cache first, then list-level fetch, then board-level fetch,
+ * guaranteeing selected cards are received on subsequent wizard steps.
+ *
+ * @param {Object} t - Trello Power-Up client instance
+ * @param {string[]} cardIds - Array of card IDs
+ * @param {string} [listId] - Optional list ID
+ * @returns {Promise<Array<Object>>}
+ */
+export async function getCardsByIds(t, cardIds, listId = null) {
+  if (!Array.isArray(cardIds) || cardIds.length === 0) return [];
+  const targetIds = new Set(cardIds);
+  const resultCards = new Map();
+
+  // 1. Check sessionStorage caches
+  try {
+    const cachedSelected = sessionStorage.getItem('selectedCardsCache');
+    if (cachedSelected) {
+      const parsed = JSON.parse(cachedSelected);
+      if (Array.isArray(parsed)) {
+        parsed.forEach((c) => {
+          if (c && targetIds.has(c.id)) {
+            resultCards.set(c.id, normalizeCard(c));
+          }
+        });
+      }
+    }
+
+    const cachedBoard = sessionStorage.getItem('boardCardsCache');
+    if (cachedBoard && resultCards.size < targetIds.size) {
+      const parsed = JSON.parse(cachedBoard);
+      if (Array.isArray(parsed)) {
+        parsed.forEach((c) => {
+          if (c && targetIds.has(c.id) && !resultCards.has(c.id)) {
+            resultCards.set(c.id, normalizeCard(c));
+          }
+        });
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  if (resultCards.size === targetIds.size) {
+    return Array.from(resultCards.values());
+  }
+
+  // 2. Query target list if provided
+  if (listId && t) {
+    try {
+      const listCards = await getCardsForList(t, listId);
+      if (Array.isArray(listCards)) {
+        listCards.forEach((c) => {
+          if (c && targetIds.has(c.id) && !resultCards.has(c.id)) {
+            resultCards.set(c.id, c);
+          }
+        });
+      }
+    } catch (err) {
+      console.warn('getCardsForList lookup failed in getCardsByIds:', err);
+    }
+  }
+
+  if (resultCards.size === targetIds.size) {
+    return Array.from(resultCards.values());
+  }
+
+  // 3. Query all board cards via t.cards
+  if (t && typeof t.cards === 'function') {
+    try {
+      const allCards = await getAllCards(t);
+      if (Array.isArray(allCards)) {
+        allCards.forEach((c) => {
+          if (c && targetIds.has(c.id) && !resultCards.has(c.id)) {
+            resultCards.set(c.id, c);
+          }
+        });
+      }
+    } catch (err) {
+      console.warn('getAllCards lookup failed in getCardsByIds:', err);
+    }
+  }
+
+  if (resultCards.size === targetIds.size) {
+    return Array.from(resultCards.values());
+  }
+
+  // 4. Fallback to STUB_CARDS for any remaining missing IDs
+  STUB_CARDS.forEach((c) => {
+    if (targetIds.has(c.id) && !resultCards.has(c.id)) {
+      resultCards.set(c.id, normalizeCard(c));
+    }
+  });
+
+  return Array.from(resultCards.values());
+}

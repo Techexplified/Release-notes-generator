@@ -2,7 +2,7 @@ import { APP_KEY, APP_NAME, APP_AUTHOR } from './config.js';
 import { renderHeader } from './components/header.js';
 import { renderStepper } from './components/stepper.js';
 import { TEMPLATES, DEFAULT_TEMPLATE_ID, getTemplateById } from './config/templates.js';
-import { getCardsForList } from './data/data-source.js';
+import { getCardsForList, getCardsByIds } from './data/data-source.js';
 import { loadDraft, saveDraft } from './state/draft.js';
 import { loadDoc, saveDoc } from './state/doc-store.js';
 import { generateNotes } from './lib/notes-generator.js';
@@ -432,8 +432,7 @@ async function init() {
     }
 
     // Fetch card objects
-    const allCards = await getCardsForList(t, draft.listId);
-    currentCards = allCards.filter((card) => totalAssignedIds.includes(card.id));
+    currentCards = await getCardsByIds(t, totalAssignedIds, draft.listId);
 
     if (currentCards.length === 0) {
       renderPrerequisiteError('Finish the previous steps to continue.');

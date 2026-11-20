@@ -432,6 +432,15 @@ async function init() {
       categories: listChanged ? undefined : storedDraft?.categories
     };
 
+    // Cache the selected card objects and current list cards in sessionStorage
+    try {
+      const selectedCardsList = currentListCards.filter((card) => selectedCardIds.has(card.id));
+      sessionStorage.setItem('selectedCardsCache', JSON.stringify(selectedCardsList));
+      sessionStorage.setItem('boardCardsCache', JSON.stringify(currentListCards));
+    } catch (cacheErr) {
+      console.warn('Unable to cache cards in sessionStorage:', cacheErr);
+    }
+
     try {
       await saveDraft(t, draft);
     } catch (err) {

@@ -2,7 +2,7 @@ import { APP_KEY, APP_NAME, APP_AUTHOR } from './config.js';
 import { renderHeader } from './components/header.js';
 import { renderStepper } from './components/stepper.js';
 import { CATEGORIES, categorize } from './config/categories.js';
-import { getCardsForList } from './data/data-source.js';
+import { getCardsForList, getCardsByIds } from './data/data-source.js';
 import { loadDraft, saveDraft } from './state/draft.js';
 import { getIcon } from './components/icons.js';
 
@@ -587,9 +587,8 @@ async function init() {
       return;
     }
 
-    // 3. Fetch cards belonging to the list
-    const allCards = await getCardsForList(t, draft.listId);
-    selectedCards = allCards.filter((card) => initialSelectedIds.includes(card.id));
+    // 3. Fetch selected cards (from session cache, list, or board)
+    selectedCards = await getCardsByIds(t, initialSelectedIds, draft.listId);
     cardMap = new Map(selectedCards.map((c) => [c.id, c]));
 
     if (selectedCards.length === 0) {

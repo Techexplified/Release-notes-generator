@@ -42,27 +42,52 @@ export const DRAFT_SCOPE = 'board';
 export const DRAFT_VISIBILITY = 'private';
 
 /**
- * Loads the saved draft from Trello board storage (with fallback to localStorage for local dev/preview).
+ * Loads the saved draft from Trello board storage (with fallback to sessionStorage and localStorage).
  * @param {Object} t - Trello Power-Up client instance
  * @returns {Promise<Object | null>}
  */
 export async function loadDraft(t) {
+  let trelloData = null;
   try {
     if (t && typeof t.get === 'function') {
       const data = await t.get(DRAFT_SCOPE, DRAFT_VISIBILITY, DRAFT_KEY);
-      if (data) return data;
+      if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+        trelloData = data;
+      }
     }
   } catch (error) {
-    console.warn('Unable to read draft from Trello storage (possibly running outside Trello iframe), falling back to localStorage:', error);
+    console.warn('Unable to read draft from Trello storage, falling back to session/local storage:', error);
   }
 
-  // Fallback for local development and direct browser preview
+  if (trelloData) return trelloData;
+
+  // Fallback to sessionStorage (fast synchronous cache for current modal session)
+  try {
+    const session = sessionStorage.getItem(DRAFT_KEY);
+    if (session) {
+      const parsed = JSON.parse(session);
+      if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
+        return parsed;
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  // Fallback to localStorage for local dev/preview
   try {
     const local = localStorage.getItem(DRAFT_KEY);
-    return local ? JSON.parse(local) : null;
+    if (local) {
+      const parsed = JSON.parse(local);
+      if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
+        return parsed;
+      }
+    }
   } catch {
-    return null;
+    // ignore
   }
+
+  return null;
 }
 
 /**
@@ -99,19 +124,25 @@ export async function saveDraft(t, draftUpdates = {}) {
     delete payload.selectedCardIds;
   }
 
+  // Synchronous session and local storage updates
+  try {
+    sessionStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
+  } catch {
+    // ignore
+  }
+
+  try {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
+  } catch {
+    // ignore
+  }
+
   try {
     if (t && typeof t.set === 'function') {
       await t.set(DRAFT_SCOPE, DRAFT_VISIBILITY, DRAFT_KEY, payload);
     }
   } catch (error) {
-    console.warn('Unable to write draft to Trello storage (possibly running outside Trello iframe), saving to localStorage:', error);
-  }
-
-  // Always keep localStorage in sync for smooth local testing
-  try {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
-  } catch (e) {
-    console.error('Failed to write to localStorage:', e);
+    console.warn('Unable to write draft to Trello storage, stored locally:', error);
   }
 }
 
