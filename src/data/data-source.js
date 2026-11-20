@@ -3,6 +3,14 @@ import { APP_KEY } from '../config.js';
 
 // Simulated latency to make loading states, skeletons, and transitions visible during preview
 const SIMULATED_LATENCY_MS = 300;
+const CARD_LOOKUP_TIMEOUT_MS = 1500;
+
+function withTimeout(promise, timeoutMs) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Card lookup timed out')), timeoutMs))
+  ]);
+}
 
 /**
  * Card Shape Contract:
@@ -302,7 +310,7 @@ export async function getCardsByIds(t, cardIds, listId = null) {
   // 2. Query target list if provided
   if (listId && t) {
     try {
-      const listCards = await getCardsForList(t, listId);
+      const listCards = await withTimeout(getCardsForList(t, listId), CARD_LOOKUP_TIMEOUT_MS);
       if (Array.isArray(listCards)) {
         listCards.forEach((c) => {
           if (c && targetIds.has(c.id) && !resultCards.has(c.id)) {
@@ -322,7 +330,7 @@ export async function getCardsByIds(t, cardIds, listId = null) {
   // 3. Query all board cards via t.cards
   if (t && typeof t.cards === 'function') {
     try {
-      const allCards = await getAllCards(t);
+      const allCards = await withTimeout(getAllCards(t), CARD_LOOKUP_TIMEOUT_MS);
       if (Array.isArray(allCards)) {
         allCards.forEach((c) => {
           if (c && targetIds.has(c.id) && !resultCards.has(c.id)) {

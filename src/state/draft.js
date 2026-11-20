@@ -40,6 +40,14 @@
 export const DRAFT_KEY = 'releaseDraft';
 export const DRAFT_SCOPE = 'board';
 export const DRAFT_VISIBILITY = 'private';
+const TRELLO_READ_TIMEOUT_MS = 1500;
+
+function withTimeout(promise, timeoutMs) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Storage read timed out')), timeoutMs))
+  ]);
+}
 
 /**
  * Loads the saved draft from Trello board storage (with fallback to sessionStorage and localStorage).
@@ -80,15 +88,19 @@ export async function loadDraft(t) {
   }
 
   // 3. Trello board storage
-  try {
-    if (t && typeof t.get === 'function') {
-      const data = await t.get(DRAFT_SCOPE, DRAFT_VISIBILITY, DRAFT_KEY);
-      if (data && typeof data === 'object' && Object.keys(data).length > 0) {
-        trelloData = data;
+  // Session/local storage are synchronously updated on every save. Avoid a
+  // slow iframe storage round trip when a current browser copy is available.
+  if (!sessionData && !localData) {
+    try {
+      if (t && typeof t.get === 'function') {
+        const data = await withTimeout(t.get(DRAFT_SCOPE, DRAFT_VISIBILITY, DRAFT_KEY), TRELLO_READ_TIMEOUT_MS);
+        if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+          trelloData = data;
+        }
       }
+    } catch (error) {
+      console.warn('Unable to read draft from Trello storage:', error);
     }
-  } catch (error) {
-    console.warn('Unable to read draft from Trello storage:', error);
   }
 
   const candidates = [sessionData, trelloData, localData].filter(Boolean);
