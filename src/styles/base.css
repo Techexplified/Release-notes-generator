@@ -990,9 +990,11 @@ button, input, select {
   flex-direction: column;
   gap: 6px;
   max-height: 220px;
-  overflow-y: auto;
+  min-height: 0;
+  overflow-y: scroll;
   overscroll-behavior: contain;
   padding: 1px 4px 1px 1px;
+  scrollbar-gutter: stable;
 }
 
 .picker-card-option {
