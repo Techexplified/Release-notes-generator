@@ -77,6 +77,22 @@ const btnBack = document.getElementById('btn-back');
 const btnNext = document.getElementById('btn-next');
 const srAnnouncements = document.getElementById('sr-announcements');
 
+// Back button handler (registered immediately so Back works at all times, including prerequisite error states)
+if (btnBack) {
+  btnBack.addEventListener('click', async () => {
+    btnBack.disabled = true;
+    try {
+      await Promise.race([
+        saveAllState(),
+        new Promise((resolve) => setTimeout(resolve, 250))
+      ]);
+    } catch (err) {
+      console.warn('Failed to save state on Back:', err);
+    }
+    window.location.href = 'categorize.html';
+  });
+}
+
 /**
  * Computes a deterministic signature string for release details and categories.
  */
@@ -563,11 +579,6 @@ async function init() {
     });
 
     // Footer Navigation
-    btnBack.addEventListener('click', async () => {
-      await saveAllState();
-      window.location.href = 'categorize.html';
-    });
-
     btnNext.addEventListener('click', async () => {
       const text = editorSurface.textContent.trim();
       if (!text) {

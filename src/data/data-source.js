@@ -1,14 +1,8 @@
 import { STUB_LISTS, STUB_CARDS } from './stub-data.js';
+import { APP_KEY } from '../config.js';
 
 // Simulated latency to make loading states, skeletons, and transitions visible during preview
 const SIMULATED_LATENCY_MS = 300;
-
-/**
- * Note on completedAt:
- * Trello has no completion timestamp (only dueComplete).
- * The real definition is an open decision; leading option is the date the card entered the source list
- * (REST actions, updateCard with listAfter). // TODO decide.
- */
 
 /**
  * Card Shape Contract:
@@ -31,20 +25,123 @@ const SIMULATED_LATENCY_MS = 300;
  *     }>
  *   }>,
  *   completedAt: string,
- *   due: string | null
+ *   due: string | null,
+ *   dueComplete: boolean
  * }
  */
 
 /**
- * Fetches lists on the current board along with their open card counts.
+ * Normalizes a raw card object (from Trello Power-Up client or REST API) into our contract shape.
  *
- * Contract:
+ * @param {Object} card
+ * @returns {Object}
+ */
+export function normalizeCard(card) {
+  if (!card) return null;
+
+  // Normalize checklists
+  const checklists = Array.isArray(card.checklists)
+    ? card.checklists.map((cl) => {
+        const rawItems = cl.checkItems || cl.items || [];
+        return {
+          id: cl.id || String(Math.random()),
+          name: cl.name || '',
+          pos: typeof cl.pos === 'number' ? cl.pos : 0,
+          checkItems: Array.isArray(rawItems)
+            ? rawItems.map((item) => ({
+                id: item.id || String(Math.random()),
+                name: item.name || '',
+                state: item.state === 'complete' ? 'complete' : 'incomplete',
+                pos: typeof item.pos === 'number' ? item.pos : 0
+              }))
+            : []
+        };
+      })
+    : [];
+
+  // Normalize labels: [{ id, name, color }]
+  const labels = Array.isArray(card.labels)
+    ? card.labels.map((lbl) => ({
+        id: lbl.id || '',
+        name: typeof lbl.name === 'string' ? lbl.name : '',
+        color: lbl.color || ''
+      }))
+    : [];
+
+  // Determine completion / activity timestamp for filtering
+  let completedAt = card.completedAt;
+  if (!completedAt) {
+    if (card.dueComplete && card.due) {
+      completedAt = card.due;
+    } else if (card.dateLastActivity) {
+      completedAt = card.dateLastActivity;
+    } else {
+      completedAt = new Date().toISOString();
+    }
+  }
+
+  return {
+    id: card.id,
+    name: card.name || 'Untitled Card',
+    desc: card.desc || '',
+    url: card.url || (card.id ? `https://trello.com/c/${card.id}` : ''),
+    idList: card.idList || '',
+    labels,
+    checklists,
+    completedAt,
+    due: card.due || null,
+    dueComplete: Boolean(card.dueComplete)
+  };
+}
+
+/**
+ * Fetches lists on the current board along with their open card counts.
+ * Uses t.lists() and t.cards() when running in Trello, falling back to STUB_LISTS outside Trello.
+ *
  * @param {Object} t - Trello Power-Up client instance
  * @returns {Promise<Array<{ id: string, name: string, cardCount: number }>>}
  */
 export async function getLists(t) {
-  // TODO: Replace with real Trello Power-Up call:
-  // t.lists('id', 'name') combined with t.cards('id', 'idList', 'closed') to count open cards per list.
+  if (t && typeof t.lists === 'function') {
+    try {
+      const [rawLists, rawCards] = await Promise.all([
+        t.lists('id', 'name', 'closed').catch(() => t.lists('all')),
+        typeof t.cards === 'function'
+          ? t.cards('id', 'idList', 'closed').catch(() => t.cards('all'))
+          : Promise.resolve([])
+      ]);
+
+      if (Array.isArray(rawLists) && rawLists.length > 0) {
+        // Filter out closed/archived lists
+        const openLists = rawLists.filter((l) => !l.closed);
+
+        // Count open cards per list
+        const cardCounts = new Map();
+        if (Array.isArray(rawCards)) {
+          for (const card of rawCards) {
+            if (!card.closed && card.idList) {
+              cardCounts.set(card.idList, (cardCounts.get(card.idList) || 0) + 1);
+            }
+          }
+        }
+
+        return openLists.map((list) => {
+          const count = cardCounts.has(list.id)
+            ? cardCounts.get(list.id)
+            : (Array.isArray(list.cards) ? list.cards.length : 0);
+          return {
+            id: list.id,
+            name: list.name,
+            cardCount: count
+          };
+        });
+      }
+    } catch (err) {
+      console.warn('Failed to fetch board lists via t.lists, falling back to stub data:', err);
+    }
+  }
+
+  // Fallback to stub data for local dev / preview outside Trello
   return new Promise((resolve) => {
     setTimeout(() => {
       const listsWithCount = STUB_LISTS.map((list) => {
@@ -62,23 +159,67 @@ export async function getLists(t) {
 
 /**
  * Fetches open cards belonging to the specified list, including checklists.
+ * Tries the Trello REST API if authorized for full check-item details,
+ * falls back to t.cards('all') from the Power-Up client,
+ * and falls back to STUB_CARDS outside Trello.
  *
- * Trello documents that check items are not guaranteed in t.cards(), and t.card() only works
- * inside a card context, so the real implementation should use the REST API:
- * GET /1/lists/{listId}/cards?fields=id,name,url,idList,labels,desc&checklists=all
- * with a token from t.getRestApi() (scope read; authorize() must run inside a click handler;
- * the Vercel origin must be in Allowed Origins). // TODO wire with the backend.
- *
- * Contract:
  * @param {Object} t - Trello Power-Up client instance
  * @param {string} listId - Trello list ID
  * @returns {Promise<Array<Object>>}
  */
 export async function getCardsForList(t, listId) {
+  if (t) {
+    // 1. If REST API client is available and authorized, query REST API for complete card data with full checklists
+    let restApi = null;
+    try {
+      if (typeof t.getRestApi === 'function') {
+        restApi = t.getRestApi();
+      }
+    } catch {
+      // ignore
+    }
+
+    if (restApi && typeof restApi.isAuthorized === 'function' && restApi.isAuthorized()) {
+      try {
+        const token = await restApi.getToken();
+        if (token && APP_KEY && APP_KEY !== 'TODO_TRELLO_APP_KEY') {
+          const url = `https://api.trello.com/1/lists/${encodeURIComponent(listId)}/cards?fields=id,name,url,idList,labels,desc,due,dueComplete,dateLastActivity&checklists=all&key=${encodeURIComponent(APP_KEY)}&token=${encodeURIComponent(token)}`;
+          const response = await fetch(url);
+          if (response.ok) {
+            const data = await response.json();
+            if (Array.isArray(data)) {
+              return data.map(normalizeCard).filter(Boolean);
+            }
+          }
+        }
+      } catch (restErr) {
+        console.warn('Trello REST API fetch failed, falling back to t.cards:', restErr);
+      }
+    }
+
+    // 2. Query board cards directly via Trello Power-Up client library
+    if (typeof t.cards === 'function') {
+      try {
+        const rawCards = await t.cards('id', 'name', 'desc', 'due', 'dueComplete', 'labels', 'url', 'idList', 'dateLastActivity', 'checklists', 'closed')
+          .catch(() => t.cards('all'));
+
+        if (Array.isArray(rawCards) && rawCards.length > 0) {
+          const listCards = rawCards.filter((card) => card.idList === listId && !card.closed);
+          if (listCards.length > 0 || rawCards.some((c) => c.idList === listId)) {
+            return listCards.map(normalizeCard).filter(Boolean);
+          }
+        }
+      } catch (cardErr) {
+        console.warn('t.cards failed, falling back to stub cards:', cardErr);
+      }
+    }
+  }
+
+  // 3. Fallback to stub data for local dev / preview outside Trello
   return new Promise((resolve) => {
     setTimeout(() => {
       const cards = STUB_CARDS.filter((card) => card.idList === listId);
-      resolve(cards);
+      resolve(cards.map(normalizeCard).filter(Boolean));
     }, SIMULATED_LATENCY_MS);
   });
 }

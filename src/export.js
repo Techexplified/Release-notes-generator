@@ -24,6 +24,7 @@ renderStepper(document.getElementById('stepper-root'), 3); // Step 4 (Export) is
 const btnBack = document.getElementById('btn-back');
 if (btnBack) {
   btnBack.addEventListener('click', () => {
+    btnBack.disabled = true;
     window.location.href = 'preview.html';
   });
 }

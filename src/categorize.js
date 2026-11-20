@@ -52,6 +52,22 @@ const btnBack = document.getElementById('btn-back');
 const btnNext = document.getElementById('btn-next');
 const srAnnouncements = document.getElementById('sr-announcements');
 
+// Back button handler (registered immediately so Back works at all times, including error states)
+if (btnBack) {
+  btnBack.addEventListener('click', async () => {
+    btnBack.disabled = true;
+    try {
+      await Promise.race([
+        saveCurrentDraft(),
+        new Promise((resolve) => setTimeout(resolve, 250))
+      ]);
+    } catch (err) {
+      console.warn('Failed to save draft on Back:', err);
+    }
+    window.location.href = 'select-cards.html';
+  });
+}
+
 /**
  * Returns today's local date as YYYY-MM-DD (no timezone conversion).
  */
@@ -669,15 +685,6 @@ async function init() {
   });
 
   // 8. Footer Action Buttons
-  btnBack.addEventListener('click', async () => {
-    try {
-      await saveCurrentDraft();
-    } catch (err) {
-      console.warn('Failed to save draft on Back:', err);
-    }
-    window.location.href = 'select-cards.html';
-  });
-
   btnNext.addEventListener('click', async () => {
     if (!validateForm()) return;
 

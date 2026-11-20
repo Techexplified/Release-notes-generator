@@ -51,9 +51,10 @@ function getFilteredCards(cards, filterId) {
 
   const cutoff = Date.now() - filter.days * 24 * 60 * 60 * 1000;
   return cards.filter((card) => {
-    if (!card.completedAt) return false;
-    const completedTime = new Date(card.completedAt).getTime();
-    return completedTime >= cutoff;
+    const timeStr = card.completedAt || (card.dueComplete && card.due) || card.dateLastActivity || card.due;
+    if (!timeStr) return true;
+    const completedTime = new Date(timeStr).getTime();
+    return isNaN(completedTime) || completedTime >= cutoff;
   });
 }
 
@@ -334,8 +335,8 @@ async function init() {
     availableLists.forEach((list) => {
       const option = document.createElement('option');
       option.value = list.id;
-      // Format: "Done (12 cards)"
-      option.textContent = `${list.name} (${list.cardCount} cards)`;
+      const countLabel = list.cardCount === 1 ? '1 card' : `${list.cardCount} cards`;
+      option.textContent = `${list.name} (${countLabel})`;
       listSelect.appendChild(option);
     });
 
