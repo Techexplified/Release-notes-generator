@@ -968,6 +968,9 @@ button, input, select {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  max-height: 260px;
+  min-height: 0;
+  overflow: hidden;
   animation: slideDown 150ms ease;
 }
 
@@ -983,18 +986,40 @@ button, input, select {
   letter-spacing: 0.5px;
   color: var(--color-text-muted);
   margin-bottom: 2px;
+  flex-shrink: 0;
 }
 
 .picker-options-list {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-height: 220px;
+  max-height: 190px;
   min-height: 0;
-  overflow-y: scroll;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f2f4;
   overscroll-behavior: contain;
-  padding: 1px 4px 1px 1px;
-  scrollbar-gutter: stable;
+  padding: 2px 6px 2px 2px;
+}
+
+.picker-options-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.picker-options-list::-webkit-scrollbar-track {
+  background: #f1f2f4;
+  border-radius: 4px;
+}
+
+.picker-options-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.picker-options-list::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .picker-card-option {
@@ -1010,6 +1035,7 @@ button, input, select {
   font-size: 13px;
   width: 100%;
   text-align: left;
+  flex-shrink: 0;
   transition: all var(--transition-fast);
 }
 
