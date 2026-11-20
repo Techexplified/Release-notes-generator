@@ -440,6 +440,10 @@ function renderCategoryRows() {
         noCardsText.textContent = 'No other cards to add.';
         pickerPanel.appendChild(noCardsText);
       } else {
+        const optionsList = document.createElement('div');
+        optionsList.className = 'picker-options-list';
+        optionsList.setAttribute('role', 'list');
+
         availableCards.forEach((card) => {
           const currentCat = findCategoryOfCard(card.id);
 
@@ -478,8 +482,11 @@ function renderCategoryRows() {
             }
           });
 
-          pickerPanel.appendChild(optionBtn);
+          optionBtn.setAttribute('role', 'listitem');
+          optionsList.appendChild(optionBtn);
         });
+
+        pickerPanel.appendChild(optionsList);
       }
 
       row.appendChild(pickerPanel);
