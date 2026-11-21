@@ -93,6 +93,30 @@ if (btnBack) {
   });
 }
 
+// Next button handler (registered immediately so Next works reliably and never hangs)
+if (btnNext) {
+  btnNext.addEventListener('click', async () => {
+    const text = editorSurface ? editorSurface.textContent.trim() : '';
+    if (!text && editorSurface && editorSurface.children.length === 0) {
+      announce('Release notes are empty');
+      return;
+    }
+
+    btnNext.disabled = true;
+
+    try {
+      await Promise.race([
+        saveAllState(),
+        new Promise((resolve) => setTimeout(resolve, 300))
+      ]);
+    } catch (err) {
+      console.warn('Failed to save state on Next:', err);
+    }
+
+    window.location.href = 'export.html';
+  });
+}
+
 /**
  * Computes a deterministic signature string for release details and categories.
  */
@@ -197,23 +221,9 @@ function generateAndSetNotes() {
 async function saveAllState() {
   if (!currentDraft) return;
 
-  const currentHtml = editorSurface.innerHTML;
+  const currentHtml = editorSurface ? editorSurface.innerHTML : '';
 
-  // 1. Save draft configuration (small payload via t.set)
-  const draftUpdates = {
-    preview: {
-      templateId: currentTemplateId,
-      include: currentInclude
-    }
-  };
-
-  try {
-    await saveDraft(t, draftUpdates);
-  } catch (err) {
-    console.warn('Failed to save draft preview settings:', err);
-  }
-
-  // 2. Save full rendered document to doc-store (sessionStorage / memory)
+  // 1. Save full rendered document to doc-store FIRST and synchronously (sessionStorage / memory)
   const docData = {
     html: currentHtml,
     signature: currentSignature,
@@ -226,6 +236,20 @@ async function saveAllState() {
     saveDoc(t, docData);
   } catch (err) {
     console.warn('Failed to save document store:', err);
+  }
+
+  // 2. Save draft configuration (small payload via t.set)
+  const draftUpdates = {
+    preview: {
+      templateId: currentTemplateId,
+      include: currentInclude
+    }
+  };
+
+  try {
+    await saveDraft(t, draftUpdates);
+  } catch (err) {
+    console.warn('Failed to save draft preview settings:', err);
   }
 }
 
@@ -608,19 +632,6 @@ async function init() {
         }
       }
     });
-
-    // Footer Navigation
-    btnNext.addEventListener('click', async () => {
-      const text = editorSurface.textContent.trim();
-      if (!text) {
-        btnNext.disabled = true;
-        btnNext.title = 'Release notes are empty';
-        return;
-      }
-      await saveAllState();
-      window.location.href = 'export.html';
-    });
-
   } catch (error) {
     console.error('Failed to initialize Step 3:', error);
     renderPrerequisiteError('Failed to load release data. Please try again.', true, () => init());

@@ -49,7 +49,23 @@ export function loadDoc(t) {
     // ignore sessionStorage errors
   }
 
-  return memoryStore.get(key) || null;
+  // Resilient fallback: check releaseDoc:default or any stored releaseDoc
+  try {
+    const defaultRaw = sessionStorage.getItem('releaseDoc:default');
+    if (defaultRaw) return JSON.parse(defaultRaw);
+
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const k = sessionStorage.key(i);
+      if (k && k.startsWith('releaseDoc:')) {
+        const val = sessionStorage.getItem(k);
+        if (val) return JSON.parse(val);
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  return memoryStore.get(key) || memoryStore.get('releaseDoc:default') || null;
 }
 
 /**
@@ -62,12 +78,15 @@ export function saveDoc(t, docData) {
   const key = getStorageKey(boardId);
 
   try {
-    sessionStorage.setItem(key, JSON.stringify(docData));
+    const serialized = JSON.stringify(docData);
+    sessionStorage.setItem(key, serialized);
+    sessionStorage.setItem('releaseDoc:default', serialized);
   } catch {
     // ignore sessionStorage quota/disabled errors
   }
 
   memoryStore.set(key, docData);
+  memoryStore.set('releaseDoc:default', docData);
 }
 
 /**
