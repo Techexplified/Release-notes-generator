@@ -26,6 +26,9 @@
  *       version: boolean
  *     }
  *   },
+ *   export?: {                                                          // Step 4 export configuration
+ *     format: 'md' | 'html' | 'txt'
+ *   },
  *   updatedAt: string (ISO timestamp)
  * }
  *
@@ -34,6 +37,7 @@
  * summed across all keys), so we store card IDs only rather than complete card payloads.
  * In step 2, selectedCardIds is deleted on every save so only a single copy of the IDs is stored.
  * In step 3, preview options are saved here while the full rendered document is stored in doc-store.js.
+ * In step 4, the user's last chosen export format is saved under export.format.
  * // TODO: move the draft to our own database keyed by board and member when the backend exists.
  */
 
