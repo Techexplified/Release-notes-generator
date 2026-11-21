@@ -442,7 +442,10 @@ async function init() {
     }
 
     try {
-      await saveDraft(t, draft);
+      await Promise.race([
+        saveDraft(t, draft),
+        new Promise((resolve) => setTimeout(resolve, 300))
+      ]);
     } catch (err) {
       console.warn('Failed to save draft before navigating:', err);
     }

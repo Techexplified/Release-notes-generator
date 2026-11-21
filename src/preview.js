@@ -430,7 +430,7 @@ async function init() {
     currentDraft = draft;
 
     // Must not have cards in uncategorized
-    const uncategorizedCards = draft.categories.uncategorized || [];
+    const uncategorizedCards = draft.categories?.uncategorized || [];
     if (uncategorizedCards.length > 0) {
       renderPrerequisiteError('Finish the previous steps to continue.');
       return;
@@ -438,9 +438,9 @@ async function init() {
 
     // Must have at least one card in features, improvements, or bugfixes
     const totalAssignedIds = [
-      ...(draft.categories.feature || []),
-      ...(draft.categories.improvement || []),
-      ...(draft.categories.bugfix || [])
+      ...(draft.categories?.feature || []),
+      ...(draft.categories?.improvement || []),
+      ...(draft.categories?.bugfix || [])
     ];
 
     if (totalAssignedIds.length === 0) {
@@ -450,6 +450,21 @@ async function init() {
 
     // Fetch card objects
     currentCards = await getCardsByIds(t, totalAssignedIds, draft.listId);
+
+    // Resilient fallback: ensure any card IDs that couldn't be resolved have safe objects
+    const fetchedMap = new Map(currentCards.map((c) => [c.id, c]));
+    for (const id of totalAssignedIds) {
+      if (!fetchedMap.has(id)) {
+        const placeholder = {
+          id,
+          name: 'Selected Card (' + (id.length > 6 ? id.slice(-6) : id) + ')',
+          labels: [],
+          checklists: []
+        };
+        currentCards.push(placeholder);
+        fetchedMap.set(id, placeholder);
+      }
+    }
 
     if (currentCards.length === 0) {
       renderPrerequisiteError('Finish the previous steps to continue.');

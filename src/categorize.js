@@ -68,6 +68,34 @@ if (btnBack) {
   });
 }
 
+// Next button handler (registered immediately so Next works reliably and never hangs)
+if (btnNext) {
+  btnNext.addEventListener('click', async () => {
+    if (!validateForm()) return;
+
+    btnNext.disabled = true;
+
+    // Cache selected cards immediately so Step 3 has them synchronously in memory
+    try {
+      sessionStorage.setItem('selectedCardsCache', JSON.stringify(selectedCards));
+    } catch (cacheErr) {
+      console.warn('Unable to cache selectedCards in sessionStorage:', cacheErr);
+    }
+
+    try {
+      await Promise.race([
+        saveCurrentDraft(),
+        new Promise((resolve) => setTimeout(resolve, 300))
+      ]);
+    } catch (err) {
+      console.warn('Failed to save draft on Next:', err);
+    }
+
+    // Navigate to Step 3 (Preview & Edit)
+    window.location.href = 'preview.html';
+  });
+}
+
 /**
  * Returns today's local date as YYYY-MM-DD (no timezone conversion).
  */
@@ -538,12 +566,27 @@ function validateForm() {
   }
 
   // 3. All cards must be assigned (Unassigned must have 0 cards)
-  if (categoriesState.uncategorized.length > 0) {
+  if (categoriesState.uncategorized && categoriesState.uncategorized.length > 0) {
     if (categoryErrorContainer) {
       categoryErrorContainer.textContent = 'Assign every card to a category to continue.';
       categoryErrorContainer.style.display = 'block';
+      categoryErrorContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
     announce('Assign every card to a category to continue.');
+    isValid = false;
+  }
+
+  // 4. Must have at least one card assigned
+  const totalAssigned = (categoriesState.feature?.length || 0) +
+                        (categoriesState.improvement?.length || 0) +
+                        (categoriesState.bugfix?.length || 0);
+  if (totalAssigned === 0 && isValid) {
+    if (categoryErrorContainer) {
+      categoryErrorContainer.textContent = 'Please assign at least one card to Features, Improvements, or Bug Fixes.';
+      categoryErrorContainer.style.display = 'block';
+      categoryErrorContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    announce('Please assign at least one card to Features, Improvements, or Bug Fixes.');
     isValid = false;
   }
 
@@ -727,20 +770,6 @@ async function init() {
         activeChevronButton.focus();
       }
     }
-  });
-
-  // 8. Footer Action Buttons
-  btnNext.addEventListener('click', async () => {
-    if (!validateForm()) return;
-
-    btnNext.disabled = true;
-    try {
-      await saveCurrentDraft();
-    } catch (err) {
-      console.warn('Failed to save draft on Next:', err);
-    }
-    // Navigate to Step 3 placeholder
-    window.location.href = 'preview.html';
   });
 }
 

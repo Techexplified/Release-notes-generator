@@ -138,11 +138,21 @@ export async function loadDraft(t) {
  * @returns {Promise<void>}
  */
 export async function saveDraft(t, draftUpdates = {}) {
+  // Read existing synchronously from session or local storage first to avoid blocking on Trello bridge
   let existing = null;
   try {
-    existing = await loadDraft(t);
+    const s = sessionStorage.getItem(DRAFT_KEY);
+    if (s) existing = JSON.parse(s);
   } catch {
     // ignore
+  }
+  if (!existing) {
+    try {
+      const l = localStorage.getItem(DRAFT_KEY);
+      if (l) existing = JSON.parse(l);
+    } catch {
+      // ignore
+    }
   }
 
   const payload = {
@@ -163,7 +173,7 @@ export async function saveDraft(t, draftUpdates = {}) {
     delete payload.selectedCardIds;
   }
 
-  // Synchronous session and local storage updates
+  // Synchronous session and local storage updates happen immediately
   try {
     sessionStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
   } catch {
