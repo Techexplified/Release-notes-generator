@@ -16,8 +16,8 @@ try {
       appAuthor: APP_AUTHOR
     });
   }
-} catch (error) {
-  console.warn('TrelloPowerUp.iframe not available outside Trello modal context; using fallback mode', error);
+} catch {
+  // fallback mode outside Trello modal context
 }
 
 // State
@@ -291,8 +291,7 @@ async function loadCardsForSelectedList(preserveSelections = false) {
     }
 
     renderCardList();
-  } catch (error) {
-    console.error('Failed to load cards for list:', error);
+  } catch {
     renderStateMessage('Failed to load cards. Please try again.', true);
   } finally {
     isLoading = false;
@@ -379,8 +378,7 @@ async function init() {
 
       await loadCardsForSelectedList(false);
     }
-  } catch (error) {
-    console.error('Initialization error:', error);
+  } catch {
     renderStateMessage('Failed to initialize board data. Please try again.', true);
   }
 
@@ -437,8 +435,8 @@ async function init() {
       const selectedCardsList = currentListCards.filter((card) => selectedCardIds.has(card.id));
       sessionStorage.setItem('selectedCardsCache', JSON.stringify(selectedCardsList));
       sessionStorage.setItem('boardCardsCache', JSON.stringify(currentListCards));
-    } catch (cacheErr) {
-      console.warn('Unable to cache cards in sessionStorage:', cacheErr);
+    } catch {
+      // ignore
     }
 
     try {
@@ -446,8 +444,8 @@ async function init() {
         saveDraft(t, draft),
         new Promise((resolve) => setTimeout(resolve, 300))
       ]);
-    } catch (err) {
-      console.warn('Failed to save draft before navigating:', err);
+    } catch {
+      // ignore
     }
 
     // Navigate to step 2 (categorize.html) inside the same iframe

@@ -21,7 +21,7 @@ try {
     });
   }
 } catch (error) {
-  console.warn('TrelloPowerUp.iframe not available outside Trello modal context; using fallback mode', error);
+  // Standalone preview / test environment without Trello iframe context
 }
 
 // State
@@ -127,7 +127,6 @@ function renderPreview() {
       release
     });
   } catch (err) {
-    console.error('Failed to build export preview:', err);
     exportPreviewContainer.textContent = 'Failed to generate preview.';
     return;
   }
@@ -197,7 +196,7 @@ function renderFormatOptions() {
         try {
           await saveDraft(t, { export: { format: selectedFormatId } });
         } catch (err) {
-          console.warn('Failed to save export format preference:', err);
+          // Non-blocking preference save failure
         }
       }
     });
@@ -270,7 +269,6 @@ function bindActionButtons() {
           release
         });
       } catch (err) {
-        console.error('Build export failed for copy:', err);
         showStatusBanner('Could not generate export content.', true);
         return;
       }
@@ -326,7 +324,6 @@ function bindActionButtons() {
         announce(statusMsg);
         showStatusBanner(statusMsg);
       } catch (err) {
-        console.error('Download execution failed:', err);
         announce('Download failed. Please try again.');
         showStatusBanner('Download failed. Please try again.', true);
       }

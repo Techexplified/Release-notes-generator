@@ -144,8 +144,8 @@ export async function getLists(t) {
           };
         });
       }
-    } catch (err) {
-      console.warn('Failed to fetch board lists via t.lists, falling back to stub data:', err);
+    } catch {
+      // fallback to stub data below
     }
   }
 
@@ -200,8 +200,8 @@ export async function getCardsForList(t, listId) {
             }
           }
         }
-      } catch (restErr) {
-        console.warn('Trello REST API fetch failed, falling back to t.cards:', restErr);
+      } catch {
+        // fallback to t.cards below
       }
     }
 
@@ -217,8 +217,8 @@ export async function getCardsForList(t, listId) {
             return listCards.map(normalizeCard).filter(Boolean);
           }
         }
-      } catch (cardErr) {
-        console.warn('t.cards failed, falling back to stub cards:', cardErr);
+      } catch {
+        // fallback to stub cards below
       }
     }
   }
@@ -247,8 +247,8 @@ export async function getAllCards(t) {
       if (Array.isArray(rawCards) && rawCards.length > 0) {
         return rawCards.filter((card) => !card.closed).map(normalizeCard).filter(Boolean);
       }
-    } catch (err) {
-      console.warn('t.cards failed in getAllCards:', err);
+    } catch {
+      // fallback to stub cards below
     }
   }
 
@@ -318,8 +318,8 @@ export async function getCardsByIds(t, cardIds, listId = null) {
           }
         });
       }
-    } catch (err) {
-      console.warn('getCardsForList lookup failed in getCardsByIds:', err);
+    } catch {
+      // ignore
     }
   }
 
@@ -338,8 +338,8 @@ export async function getCardsByIds(t, cardIds, listId = null) {
           }
         });
       }
-    } catch (err) {
-      console.warn('getAllCards lookup failed in getCardsByIds:', err);
+    } catch {
+      // ignore
     }
   }
 

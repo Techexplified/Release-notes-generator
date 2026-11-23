@@ -144,6 +144,8 @@ export default async function handler(req, res) {
     `attachment; filename="${asciiSafe}"; filename*=UTF-8''${percentEncoded}`
   );
   res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox;");
 

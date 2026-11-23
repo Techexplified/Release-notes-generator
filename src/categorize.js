@@ -17,7 +17,7 @@ try {
     });
   }
 } catch (error) {
-  console.warn('TrelloPowerUp.iframe not available outside Trello modal context; using fallback mode', error);
+  // Standalone preview / test environment without Trello iframe context
 }
 
 // State
@@ -62,7 +62,7 @@ if (btnBack) {
         new Promise((resolve) => setTimeout(resolve, 250))
       ]);
     } catch (err) {
-      console.warn('Failed to save draft on Back:', err);
+      // Non-blocking draft save failure
     }
     window.location.href = 'select-cards.html';
   });
@@ -79,7 +79,7 @@ if (btnNext) {
     try {
       sessionStorage.setItem('selectedCardsCache', JSON.stringify(selectedCards));
     } catch (cacheErr) {
-      console.warn('Unable to cache selectedCards in sessionStorage:', cacheErr);
+      // Storage quota or privacy restriction
     }
 
     try {
@@ -88,7 +88,7 @@ if (btnNext) {
         new Promise((resolve) => setTimeout(resolve, 300))
       ]);
     } catch (err) {
-      console.warn('Failed to save draft on Next:', err);
+      // Non-blocking draft save failure
     }
 
     // Navigate to Step 3 (Preview & Edit)
@@ -246,7 +246,7 @@ function scheduleAutosave() {
     try {
       await saveCurrentDraft();
     } catch (err) {
-      console.warn('Autosave failed:', err);
+      // Non-blocking draft save failure
     }
   }, 400);
 }
@@ -745,7 +745,6 @@ async function init() {
     });
 
   } catch (error) {
-    console.error('Failed to initialize Step 2:', error);
     renderEmptyOrErrorState('Failed to load cards. Please try again.', true, () => init());
     return;
   }

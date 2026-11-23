@@ -102,8 +102,8 @@ export async function loadDraft(t) {
           trelloData = data;
         }
       }
-    } catch (error) {
-      console.warn('Unable to read draft from Trello storage:', error);
+    } catch {
+      // ignore Trello storage read error
     }
   }
 
@@ -194,8 +194,8 @@ export async function saveDraft(t, draftUpdates = {}) {
     if (t && typeof t.set === 'function') {
       await t.set(DRAFT_SCOPE, DRAFT_VISIBILITY, DRAFT_KEY, payload);
     }
-  } catch (error) {
-    console.warn('Unable to write draft to Trello storage, stored locally:', error);
+  } catch {
+    // fallback to local storage only
   }
 }
 
@@ -209,8 +209,8 @@ export async function clearDraft(t) {
     if (t && typeof t.set === 'function') {
       await t.set(DRAFT_SCOPE, DRAFT_VISIBILITY, DRAFT_KEY, undefined);
     }
-  } catch (error) {
-    console.warn('Unable to clear Trello storage:', error);
+  } catch {
+    // ignore
   }
 
   try {

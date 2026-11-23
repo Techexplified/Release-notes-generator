@@ -52,6 +52,11 @@ export function toHtml({ root, templateId = 'customer', release = {} }) {
   metaCsp.setAttribute('content', "default-src 'none'; style-src 'unsafe-inline'; img-src data:;");
   head.appendChild(metaCsp);
 
+  const metaReferrer = doc.createElement('meta');
+  metaReferrer.setAttribute('name', 'referrer');
+  metaReferrer.setAttribute('content', 'strict-origin-when-cross-origin');
+  head.appendChild(metaReferrer);
+
   const titleEl = doc.createElement('title');
   titleEl.textContent = docTitle;
   head.appendChild(titleEl);

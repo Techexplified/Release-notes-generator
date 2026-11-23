@@ -31,7 +31,7 @@ try {
     });
   }
 } catch (error) {
-  console.warn('TrelloPowerUp.iframe not available outside Trello modal context; using fallback mode', error);
+  // Standalone preview / test environment without Trello iframe context
 }
 
 // Config array for Include checkboxes
@@ -87,7 +87,7 @@ if (btnBack) {
         new Promise((resolve) => setTimeout(resolve, 250))
       ]);
     } catch (err) {
-      console.warn('Failed to save state on Back:', err);
+      // Non-blocking state save failure
     }
     window.location.href = 'categorize.html';
   });
@@ -110,7 +110,7 @@ if (btnNext) {
         new Promise((resolve) => setTimeout(resolve, 300))
       ]);
     } catch (err) {
-      console.warn('Failed to save state on Next:', err);
+      // Non-blocking state save failure
     }
 
     window.location.href = 'export.html';
@@ -235,7 +235,7 @@ async function saveAllState() {
   try {
     saveDoc(t, docData);
   } catch (err) {
-    console.warn('Failed to save document store:', err);
+    // Non-blocking doc store save failure
   }
 
   // 2. Save draft configuration (small payload via t.set)
@@ -249,7 +249,7 @@ async function saveAllState() {
   try {
     await saveDraft(t, draftUpdates);
   } catch (err) {
-    console.warn('Failed to save draft preview settings:', err);
+    // Non-blocking draft preview settings save failure
   }
 }
 
@@ -633,7 +633,6 @@ async function init() {
       }
     });
   } catch (error) {
-    console.error('Failed to initialize Step 3:', error);
     renderPrerequisiteError('Failed to load release data. Please try again.', true, () => init());
   }
 }

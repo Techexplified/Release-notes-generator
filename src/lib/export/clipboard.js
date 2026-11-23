@@ -15,8 +15,8 @@ export async function copyText(text) {
     try {
       await navigator.clipboard.writeText(text);
       return true;
-    } catch (clipErr) {
-      console.warn('navigator.clipboard.writeText failed, attempting execCommand fallback:', clipErr);
+    } catch {
+      // fallback to execCommand below
     }
   }
 
@@ -40,8 +40,7 @@ export async function copyText(text) {
     textarea.remove();
 
     return Boolean(successful);
-  } catch (err) {
-    console.warn('Clipboard copy fallback failed:', err);
+  } catch {
     return false;
   }
 }
