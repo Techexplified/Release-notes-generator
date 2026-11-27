@@ -12,10 +12,11 @@ window.TrelloPowerUp.initialize({
         },
         text: 'Release Notes',
         callback: function (t) {
-          // Open step 1 modal
+          // Open step 1 modal with signed URL if supported by Trello
           // Do NOT pass a title because our page renders its own custom header
+          const modalUrl = typeof t.signUrl === 'function' ? t.signUrl('./select-cards.html') : './select-cards.html';
           return t.modal({
-            url: './select-cards.html',
+            url: modalUrl,
             height: 640,
             fullscreen: false
           });

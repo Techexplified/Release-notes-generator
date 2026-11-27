@@ -9,20 +9,10 @@ import { copyText } from './lib/export/clipboard.js';
 import { loadDoc } from './state/doc-store.js';
 import { loadDraft, saveDraft } from './state/draft.js';
 import { sanitizeHtml } from './lib/sanitize.js';
+import { initTrelloIframe, navigateTo } from './lib/trello-context.js';
 
 // Initialize Trello iframe client
-let t = null;
-try {
-  if (typeof window !== 'undefined' && window.TrelloPowerUp) {
-    t = window.TrelloPowerUp.iframe({
-      appKey: APP_KEY,
-      appName: APP_NAME,
-      appAuthor: APP_AUTHOR
-    });
-  }
-} catch (error) {
-  // Standalone preview / test environment without Trello iframe context
-}
+const t = initTrelloIframe();
 
 // State
 let currentDoc = null;
@@ -51,7 +41,7 @@ const srAnnouncements = document.getElementById('sr-announcements');
 if (btnBack) {
   btnBack.addEventListener('click', () => {
     btnBack.disabled = true;
-    window.location.href = 'preview.html';
+    navigateTo('preview.html');
   });
 }
 
@@ -97,7 +87,7 @@ function renderPrerequisiteError(message) {
   backBtn.className = 'btn-primary';
   backBtn.textContent = 'Back to Preview & Edit';
   backBtn.addEventListener('click', () => {
-    window.location.href = 'preview.html';
+    navigateTo('preview.html');
   });
   container.appendChild(backBtn);
 

@@ -5,20 +5,10 @@ import { CATEGORIES, categorize } from './config/categories.js';
 import { getCardsForList, getCardsByIds } from './data/data-source.js';
 import { loadDraft, saveDraft } from './state/draft.js';
 import { getIcon } from './components/icons.js';
+import { initTrelloIframe, navigateTo } from './lib/trello-context.js';
 
 // Initialize Trello iframe client
-let t = null;
-try {
-  if (typeof window !== 'undefined' && window.TrelloPowerUp) {
-    t = window.TrelloPowerUp.iframe({
-      appKey: APP_KEY,
-      appName: APP_NAME,
-      appAuthor: APP_AUTHOR
-    });
-  }
-} catch (error) {
-  // Standalone preview / test environment without Trello iframe context
-}
+const t = initTrelloIframe();
 
 // State
 let currentDraft = null;
@@ -64,7 +54,7 @@ if (btnBack) {
     } catch (err) {
       // Non-blocking draft save failure
     }
-    window.location.href = 'select-cards.html';
+    navigateTo('select-cards.html');
   });
 }
 
@@ -92,7 +82,7 @@ if (btnNext) {
     }
 
     // Navigate to Step 3 (Preview & Edit)
-    window.location.href = 'preview.html';
+    navigateTo('preview.html');
   });
 }
 
@@ -297,7 +287,7 @@ function renderEmptyOrErrorState(message, showRetry = false, retryAction = null)
     backBtn.className = 'btn-primary';
     backBtn.textContent = 'Back to Card Selection';
     backBtn.addEventListener('click', () => {
-      window.location.href = 'select-cards.html';
+      navigateTo('select-cards.html');
     });
     container.appendChild(backBtn);
   }

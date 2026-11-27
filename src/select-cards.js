@@ -5,20 +5,10 @@ import { FILTERS, DEFAULT_FILTER_ID } from './config/filters.js';
 import { categorize, getCategoryById } from './config/categories.js';
 import { getLists, getCardsForList } from './data/data-source.js';
 import { loadDraft, saveDraft } from './state/draft.js';
+import { initTrelloIframe, navigateTo } from './lib/trello-context.js';
 
 // Initialize Trello iframe client
-let t = null;
-try {
-  if (typeof window !== 'undefined' && window.TrelloPowerUp) {
-    t = window.TrelloPowerUp.iframe({
-      appKey: APP_KEY,
-      appName: APP_NAME,
-      appAuthor: APP_AUTHOR
-    });
-  }
-} catch {
-  // fallback mode outside Trello modal context
-}
+const t = initTrelloIframe();
 
 // State
 let availableLists = [];
@@ -449,7 +439,7 @@ async function init() {
     }
 
     // Navigate to step 2 (categorize.html) inside the same iframe
-    window.location.href = 'categorize.html';
+    navigateTo('categorize.html');
   });
 }
 

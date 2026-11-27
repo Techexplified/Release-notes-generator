@@ -10,29 +10,10 @@ import { sanitizeHtml } from './lib/sanitize.js';
 import { createTabs } from './components/tabs.js';
 import { createEditorToolbar } from './components/editor-toolbar.js';
 import { confirmDialog } from './components/confirm-dialog.js';
-
-/**
- * CONTRACT FOR STEP 4 (Export):
- * Step 4 will read:
- * - loadDoc(t): { html: string, templateId: string, include: Object, signature: string }
- * - loadDraft(t): { release: { title, version, date }, categories: { ... } }
- * Step 4 will offer export options: Copy to Clipboard, Markdown, HTML, and Plain Text.
- * HTML export can inline the template CSS; Markdown and Plain Text cannot carry fonts. // TODO.
- */
+import { initTrelloIframe, navigateTo } from './lib/trello-context.js';
 
 // Initialize Trello iframe client
-let t = null;
-try {
-  if (typeof window !== 'undefined' && window.TrelloPowerUp) {
-    t = window.TrelloPowerUp.iframe({
-      appKey: APP_KEY,
-      appName: APP_NAME,
-      appAuthor: APP_AUTHOR
-    });
-  }
-} catch (error) {
-  // Standalone preview / test environment without Trello iframe context
-}
+const t = initTrelloIframe();
 
 // Config array for Include checkboxes
 const INCLUDE_CONFIG = [
@@ -89,7 +70,7 @@ if (btnBack) {
     } catch (err) {
       // Non-blocking state save failure
     }
-    window.location.href = 'categorize.html';
+    navigateTo('categorize.html');
   });
 }
 
@@ -113,7 +94,7 @@ if (btnNext) {
       // Non-blocking state save failure
     }
 
-    window.location.href = 'export.html';
+    navigateTo('export.html');
   });
 }
 
@@ -290,7 +271,7 @@ function renderPrerequisiteError(message, showRetry = false, onRetry = null) {
     backBtn.className = 'btn-primary';
     backBtn.textContent = 'Back to Categorize';
     backBtn.addEventListener('click', () => {
-      window.location.href = 'categorize.html';
+      navigateTo('categorize.html');
     });
     container.appendChild(backBtn);
   }
